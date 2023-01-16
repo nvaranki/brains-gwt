@@ -64,7 +64,6 @@
       <!-- Additional arguments like -style PRETTY, -logLevel DEBUG or -nosuperDevMode -->
       <arg line="${gwt.args}"/>
       <arg value="com.varankin.brains.gwt.ThinkerApplication"/>
-      <arg value="com.varankin.brains.gwt.ThinkerApplication"/>
     </java>
   </target>
 
