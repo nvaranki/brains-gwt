@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.StackLayoutPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextArea;
-import com.varankin.brains.gwt.client.service.db.DbServiceAsync;
+import com.varankin.brains.gwt.client.service.db.DbNodeServiceAsync;
 
 /**
  *

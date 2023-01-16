@@ -2,15 +2,15 @@ package com.varankin.brains.gwt.server;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.varankin.brains.gwt.client.model.DbNode;
-import com.varankin.brains.gwt.client.service.db.DbService;
+import com.varankin.brains.gwt.client.service.db.DbNodeService;
 import com.varankin.brains.gwt.shared.FieldVerifier;
 
 /**
  * The server-side implementation of the RPC service.
  */
-public class DbServiceImpl 
+public class DbNodeServiceImpl 
         extends RemoteServiceServlet 
-        implements DbService 
+        implements DbNodeService 
 {
 
   public String greetServer(String input) throws IllegalArgumentException {
@@ -49,7 +49,7 @@ public class DbServiceImpl
   }
 
     @Override
-    public DbNode[] childrenOf( DbNode[] path ) throws IllegalArgumentException
+    public DbNode[] nodesFrom( DbNode[] path ) throws IllegalArgumentException
     {
         // lookup DB service
         // locate node by path

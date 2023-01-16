@@ -6,9 +6,9 @@ import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
-import com.varankin.brains.gwt.client.service.db.DbService;
 import com.varankin.brains.gwt.client.model.DbNode;
-import com.varankin.brains.gwt.client.service.db.DbServiceAsync;
+import com.varankin.brains.gwt.client.service.db.DbNodeService;
+import com.varankin.brains.gwt.client.service.db.DbNodeServiceAsync;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class ArchiveView extends Tree //TODO CellTree
 {
-    public final DbServiceAsync dbService = GWT.create( DbService.class );
+    private DbNodeServiceAsync dbService;
 
     public ArchiveView()
     {
@@ -53,9 +53,10 @@ public class ArchiveView extends Tree //TODO CellTree
     
     void init()
     {
+        dbService = GWT.create( DbNodeService.class );
         // obtain root items
         if( dbService != null )
-            dbService.childrenOf( new DbNode[0], new AsyncCallback<DbNode[]>()
+            dbService.nodesFrom( new DbNode[0], new AsyncCallback<DbNode[]>()
             {
                 @Override
                 public void onFailure( Throwable caught )
@@ -78,7 +79,7 @@ public class ArchiveView extends Tree //TODO CellTree
     {
         // obtain actual children
         if( dbService == null ) return;
-        dbService.childrenOf( getItemPath( event.getTarget() ), new AsyncCallback<DbNode[]>()
+        dbService.nodesFrom( getItemPath( event.getTarget() ), new AsyncCallback<DbNode[]>()
         {
             @Override
             public void onFailure( Throwable caught )

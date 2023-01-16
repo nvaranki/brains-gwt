@@ -6,8 +6,8 @@ import com.varankin.brains.gwt.client.model.DbNode;
 /**
  * The async counterpart of <code>DbService</code>.
  */
-public interface DbServiceAsync 
+public interface DbNodeServiceAsync 
 {
-  void childrenOf( DbNode[] path, AsyncCallback<DbNode[]> callback )
+  void nodesFrom( DbNode[] path, AsyncCallback<DbNode[]> callback )
       throws IllegalArgumentException;
 }
