@@ -27,8 +27,8 @@
     <mkdir dir="war/WEB-INF/classes"/>
     <javac srcdir="src" includes="**" encoding="utf-8"
         destdir="war/WEB-INF/classes"
-        source="1.7" target="1.7" nowarn="true"
-        debug="true" debuglevel="lines,vars,source">
+        source="15" target="15" nowarn="true"
+        debug="true" debuglevel="lines,vars,source" includeantruntime="false">
       <classpath refid="project.class.path"/>
     </javac>
     <copy todir="war/WEB-INF/classes">
