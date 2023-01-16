@@ -11,6 +11,7 @@
 /gwt-unit*/
 /war/WEB-INF/classes/
 /war/WEB-INF/deploy/
+/war/WEB-INF/lib/
 ThinkerApplication.war
 *.gwt.rpc
 *.cache.js
