@@ -9,5 +9,9 @@
 /.gradle/
 *.class
 /gwt-unit*/
+/war/WEB-INF/classes/
 /war/WEB-INF/deploy/
 ThinkerApplication.war
+*.gwt.rpc
+*.cache.js
+compilation-mappings.txt
