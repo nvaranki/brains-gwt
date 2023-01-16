@@ -8,6 +8,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.StackLayoutPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextArea;
@@ -29,8 +30,8 @@ public class MainView extends DockLayoutPanel
         archive = new ArchiveView();
         
         StackLayoutPanel browsers = new StackLayoutPanel( Unit.EM );
-        browsers.add( browser, "Browser", 2 );
-        browsers.add( archive, "Archive", 2 );
+        browsers.add( new ScrollPanel( browser ), "Browser", 2 );
+        browsers.add( new ScrollPanel( archive ), "Archive", 2 );
 
         TabLayoutPanel tabs = new TabLayoutPanel( 2, Unit.EM );
         tabs.add( new Label("TODO Quick Start is here"), "Quick Start" );
