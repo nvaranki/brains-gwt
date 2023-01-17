@@ -4,14 +4,23 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
+import static com.varankin.brains.db.xml.Xml.PI_ELEMENT;
+import static com.varankin.brains.db.xml.Xml.XML_CDATA;
+import static com.varankin.brains.db.xml.XmlBrains.*;
 import com.varankin.brains.gwt.client.model.DbNode;
 import com.varankin.brains.gwt.client.service.db.DbNodeService;
 import com.varankin.brains.gwt.client.service.db.DbNodeServiceAsync;
+import static com.varankin.io.xml.svg.XmlSvg.*;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -20,6 +29,49 @@ import java.util.List;
 public class ArchiveView extends Tree //TODO CellTree
 {
     private DbNodeServiceAsync dbService;
+    private static final String XML_NS_TEMP = "#NS";
+    private static final String XML_UN_TEMP = "#OTHER";
+    private static final String XML_GRAPHIC = "#GRAPHIC";
+    private static final Map<String,String> iconFileName;
+    static
+    {
+        iconFileName = new HashMap<>();
+        iconFileName.put( XML_ARHIVE, "archive.png" );
+        iconFileName.put( XML_BRAINS, "package.png" );
+        iconFileName.put( XML_LIBRARY, "new-library.png" );
+        iconFileName.put( XML_PROJECT, "new-project.png" );
+        iconFileName.put( XML_SIGNAL, "signal.png" );
+        iconFileName.put( XML_FRAGMENT, "fragment.png" );
+        iconFileName.put( XML_NOTE, "properties.png" );
+        iconFileName.put( XML_PROCESSOR, "processor2.png" );
+        iconFileName.put( XML_PARAMETER, "parameter.png" );
+        iconFileName.put( XML_JAVA, "java.png" );
+        iconFileName.put( XML_JOINT, "connector.png" );
+        iconFileName.put( XML_PIN, "pin.png" );
+        iconFileName.put( XML_COMPUTE, "function.png" );
+        iconFileName.put( XML_MODULE, "module.png" );
+        iconFileName.put( XML_TIMELINE, "timeline.png" );
+        iconFileName.put( XML_FIELD, "field2.png" );
+        iconFileName.put( XML_SENSOR, "sensor.png" );
+        iconFileName.put( XML_POINT, "point.png" );
+        iconFileName.put( PI_ELEMENT, "instruction.png" );
+        iconFileName.put( XML_NS_TEMP, "namespace.png" );
+        iconFileName.put( XML_BASKET, "remove.png" );
+        iconFileName.put( XML_CDATA, "text.png" );
+        iconFileName.put( XML_GRAPHIC, "preview.png" );
+        iconFileName.put( SVG_ELEMENT_CIRCLE, "preview.png" );
+        iconFileName.put( SVG_ELEMENT_ELLIPSE, "preview.png" );
+        iconFileName.put( SVG_ELEMENT_A, "preview.png" );
+        iconFileName.put( SVG_ELEMENT_G, "preview.png" );
+        iconFileName.put( SVG_ELEMENT_LINE, "preview.png" );
+        iconFileName.put( SVG_ELEMENT_POLYGON, "preview.png" );
+        iconFileName.put( SVG_ELEMENT_POLYLINE, "preview.png" );
+        iconFileName.put( SVG_ELEMENT_RECT, "preview.png" );
+        iconFileName.put( SVG_ELEMENT_SYMBOL, "preview.png" );
+        iconFileName.put( SVG_ELEMENT_TEXT, "preview.png" );
+        iconFileName.put( SVG_ELEMENT_USE, "preview.png" );
+        iconFileName.put( null, "properties.png" );
+    }
 
     public ArchiveView()
     {
@@ -29,8 +81,11 @@ public class ArchiveView extends Tree //TODO CellTree
     
     private static TreeItem itemOf( DbNode dbn )
     {
-        TreeItem item = new TreeItem();
-        item.setText( "[" + dbn.type().replace( "#", "" ) + "] " + dbn.name() );
+        HorizontalPanel hp = new HorizontalPanel();
+        hp.add( new Image( "images/icons16x16/" + iconFileName.getOrDefault( dbn.type(), iconFileName.get( null ) ) ) );
+        hp.add( new Label( String.valueOf( Character.toChars( 0x00A0 ) ) + dbn.name() ) );
+
+        TreeItem item = new TreeItem( hp );
         item.setTitle( dbn.type() + '/' + dbn.zone() );
         item.setUserObject( dbn );
         item.addTextItem( "Loading..." ); // a hidden placeholder, to allow to open/close children
