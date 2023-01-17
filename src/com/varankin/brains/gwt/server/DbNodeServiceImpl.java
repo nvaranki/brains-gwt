@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -140,6 +141,8 @@ public class DbNodeServiceImpl
                     break;
                 }
         }
+        result.sort( Comparator.comparing( DbNode::zone )
+                .thenComparing( DbNode::type ).thenComparing( DbNode::name ) );
         return result.toArray( DbNode[]::new );
     }
     
