@@ -31,7 +31,7 @@ public class MainView extends DockLayoutPanel
         
         StackLayoutPanel browsers = new StackLayoutPanel( Unit.EM );
         browsers.add( new ScrollPanel( browser ), "Browser", 2 );
-        browsers.add( new ScrollPanel( archive ), "Archive", 2 );
+        browsers.add( archive, "Archive", 2 );
 
         TabLayoutPanel tabs = new TabLayoutPanel( 2, Unit.EM );
         tabs.add( new Label("TODO Quick Start is here"), "Quick Start" );

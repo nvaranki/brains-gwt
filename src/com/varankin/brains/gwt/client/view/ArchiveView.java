@@ -1,14 +1,20 @@
 package com.varankin.brains.gwt.client.view;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import static com.varankin.brains.db.xml.Xml.PI_ELEMENT;
 import static com.varankin.brains.db.xml.Xml.XML_CDATA;
 import static com.varankin.brains.db.xml.XmlBrains.*;
@@ -26,9 +32,9 @@ import java.util.Map;
  *
  * @author nvara
  */
-public class ArchiveView extends Tree //TODO CellTree
+public class ArchiveView extends DockLayoutPanel
 {
-    private DbNodeServiceAsync dbService;
+    private static final String IPATH = "images/icons16x16/";
     private static final String XML_NS_TEMP = "#NS";
     private static final String XML_UN_TEMP = "#OTHER";
     private static final String XML_GRAPHIC = "#GRAPHIC";
@@ -73,16 +79,39 @@ public class ArchiveView extends Tree //TODO CellTree
         iconFileName.put( null, "properties.png" );
     }
 
+    private DbNodeServiceAsync dbService;
+    private final Tree tree; //TODO CellTree
+    
     public ArchiveView()
     {
-        addOpenHandler( this::onOpenEvent );
-        addCloseHandler( this::onCloseEvent );
+        super( Style.Unit.PX );
+
+        VerticalPanel toolbar = new VerticalPanel();
+        toolbar.setSpacing( 2 ); //TODO -> CSS
+        toolbar.add( new PushButton( new Image( IPATH + "archive.png" ), this::onClickOpen ) );
+        toolbar.add( new PushButton( new Image( IPATH + "load.png" ), this::onClickLoad ) );
+        toolbar.add( new PushButton( new Image( IPATH + "new-library.png" ), this::onClickNew ) );
+        toolbar.add( new PushButton( new Image( IPATH + "preview.png" ), this::onClickPreview ) );
+        toolbar.add( new PushButton( new Image( IPATH + "edit.png" ), this::onClickEdit ) );
+        toolbar.add( new PushButton( new Image( IPATH + "multiply.png" ), this::onClickMultiply ) );
+        toolbar.add( new PushButton( new Image( IPATH + "remove.png" ), this::onClickRemove ) );
+        toolbar.add( new PushButton( new Image( IPATH + "file-xml.png" ), this::onClickImportFile ) );
+        toolbar.add( new PushButton( new Image( IPATH + "load-internet.png" ), this::onClickImportNet ) );
+        toolbar.add( new PushButton( new Image( IPATH + "file-export.png" ), this::onClickExportXml ) );
+        toolbar.add( new PushButton( new Image( IPATH + "file-export.png" ), this::onClickExportPic ) );
+        toolbar.add( new PushButton( new Image( IPATH + "properties.png" ), this::onClickProperties ) );
+        addWest( toolbar, 40 );
+        
+        tree = new Tree();
+        tree.addOpenHandler( this::onOpenEvent );
+        tree.addCloseHandler( this::onCloseEvent );
+        add( new ScrollPanel( tree ) );
     }
     
     private static TreeItem itemOf( DbNode dbn )
     {
         HorizontalPanel hp = new HorizontalPanel();
-        hp.add( new Image( "images/icons16x16/" + iconFileName.getOrDefault( dbn.type(), iconFileName.get( null ) ) ) );
+        hp.add( new Image( IPATH + "" + iconFileName.getOrDefault( dbn.type(), iconFileName.get( null ) ) ) );
         hp.add( new Label( String.valueOf( Character.toChars( 0x00A0 ) ) + dbn.name() ) );
 
         TreeItem item = new TreeItem( hp );
@@ -123,11 +152,71 @@ public class ArchiveView extends Tree //TODO CellTree
                 public void onSuccess( DbNode[] result )
                 {
                     // refresh list of children
-                    ArchiveView target = ArchiveView.this;
+                    Tree target = ArchiveView.this.tree;
                     target.removeItems();
                     Arrays.stream( result ).forEach( c -> target.addItem( itemOf( c ) ) );
                 }
             } );
+    }
+    
+    private void onClickOpen( ClickEvent event )
+    {
+        
+    }
+    
+    private void onClickLoad( ClickEvent event )
+    {
+        
+    }
+    
+    private void onClickNew( ClickEvent event )
+    {
+        
+    }
+    
+    private void onClickPreview( ClickEvent event )
+    {
+        
+    }
+    
+    private void onClickEdit( ClickEvent event )
+    {
+        
+    }
+    
+    private void onClickMultiply( ClickEvent event )
+    {
+        
+    }
+    
+    private void onClickRemove( ClickEvent event )
+    {
+        
+    }
+    
+    private void onClickImportFile( ClickEvent event )
+    {
+        
+    }
+    
+    private void onClickImportNet( ClickEvent event )
+    {
+        
+    }
+    
+    private void onClickExportXml( ClickEvent event )
+    {
+        
+    }
+    
+    private void onClickExportPic( ClickEvent event )
+    {
+        
+    }
+    
+    private void onClickProperties( ClickEvent event )
+    {
+        
     }
     
     private void onOpenEvent( OpenEvent<TreeItem> event )
