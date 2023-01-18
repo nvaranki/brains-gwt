@@ -181,7 +181,8 @@ public class DbNodeServiceImpl
         return new DbNode(
             name( dba ), 
             dba.тип().НАЗВАНИЕ, 
-            Objects.requireNonNullElse( dba.тип().ЗОНА, "" ) );
+            Objects.requireNonNullElse( dba.тип().ЗОНА, "" ),
+            dba.отметка() );
     }
     
     private static boolean equals( DbАтрибутный dba, DbNode dbn )
@@ -189,10 +190,12 @@ public class DbNodeServiceImpl
         String name = name( dba );
         String type = dba.тип().НАЗВАНИЕ;
         String zone = Objects.requireNonNullElse( dba.тип().ЗОНА, "" );
+        String tag  = dba.отметка();
         //System.out.printf( "%s <> %s, %s <> %s, %s <> %s \n", dbn.name(), name, dbn.type(), type, dbn.zone(), zone );
         return Objects.equals( dbn.name(), name ) 
             && Objects.equals( dbn.type(), type ) 
-            && Objects.equals( dbn.zone(), zone );
+            && Objects.equals( dbn.zone(), zone )
+            && Objects.equals( dbn.tag(),  tag  );
     }
     
     private static String name( DbАтрибутный dba )
