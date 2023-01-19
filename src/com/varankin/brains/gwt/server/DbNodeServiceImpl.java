@@ -188,8 +188,14 @@ public class DbNodeServiceImpl
     private static String name( DbАтрибутный dba )
     {
         return dba instanceof Именованный ? 
-            Objects.requireNonNullElse( ( (Именованный) dba ).название(), dba.тип().НАЗВАНИЕ ) : 
+            Objects.requireNonNullElse( nullable( ( (Именованный) dba ).название() ), dba.тип().НАЗВАНИЕ ) : 
             dba.тип().НАЗВАНИЕ;
+    }
+
+    @Deprecated //TODO check why it happens
+    private static String nullable( String text )
+    {
+        return text == null || text.isBlank() ? null : text;
     }
 
 }
