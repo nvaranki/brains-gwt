@@ -28,28 +28,14 @@ public class DbNodeServiceImpl
         extends RemoteServiceServlet 
         implements DbNodeService 
 {
-    private final Collection<NeoАрхив> archives;
-
     public DbNodeServiceImpl()
     {
-        archives = new LinkedList<>();
-        try
-        {
-            archives.add( new NeoАрхив(
-                    new File( "C:\\Users\\nvara\\Projects\\Thinker\\mind-sample\\neo4j\\repo" ), //TODO DEBUG
-                    new HashMap<>() ) );
-        }
-        catch( Exception ex )
-        {
-            ex.printStackTrace();
-        }
     }
     
     @Override
     public void destroy()
     {
-        archives.forEach( NeoАрхив::закрыть );
-        archives.clear();
+        DbManager.getInstance().all().forEach( NeoАрхив::закрыть );
         super.destroy();
     }
 
@@ -95,7 +81,7 @@ public class DbNodeServiceImpl
         
         if( path == null || path.length == 0 )
         {
-            for( DbАрхив архив : archives )
+            for( DbАрхив архив : DbManager.getInstance().all() )
                 try( Транзакция транзакция = архив.транзакция() )
                 {
                     транзакция.завершить( result.add( instanceOfDbNode( архив ) ) );
@@ -110,7 +96,8 @@ public class DbNodeServiceImpl
             DbАтрибутный target = null;
             for( DbNode dbn : path )
             {
-                Collection<? extends DbАтрибутный> candidates = target == null ? archives : allChildren( target );
+                Collection<? extends DbАтрибутный> candidates = target == null ? 
+                        DbManager.getInstance().all() : allChildren( target );
                 target = null;
                 for( DbАтрибутный dba : candidates )
                     try( Транзакция транзакция = dba.транзакция() )
