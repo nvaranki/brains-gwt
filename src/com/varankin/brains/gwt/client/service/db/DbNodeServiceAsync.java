@@ -8,6 +8,6 @@ import com.varankin.brains.gwt.client.model.DbNode;
  */
 public interface DbNodeServiceAsync 
 {
-  void nodesFrom( DbNode[] path, AsyncCallback<DbNode[]> callback )
-      throws IllegalArgumentException;
+  void nodesFrom( DbNode[] path, AsyncCallback<DbNode[]> callback ) throws IllegalArgumentException;
+  void archiveNodes( DbNode[] expected, AsyncCallback<DbNode[]> callback ) throws IllegalArgumentException;
 }

@@ -5,6 +5,8 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.storage.client.Storage;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -14,13 +16,18 @@ import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.web.bindery.autobean.shared.AutoBean;
+import com.google.web.bindery.autobean.shared.AutoBeanCodex;
 import static com.varankin.brains.db.xml.Xml.PI_ELEMENT;
 import static com.varankin.brains.db.xml.Xml.XML_CDATA;
 import static com.varankin.brains.db.xml.XmlBrains.*;
 import com.varankin.brains.gwt.client.model.DbNode;
+import com.varankin.brains.gwt.client.model.DbNodeBean;
 import com.varankin.brains.gwt.client.service.db.DbNodeService;
 import com.varankin.brains.gwt.client.service.db.DbNodeServiceAsync;
+import com.varankin.brains.gwt.shared.JsonFactory;
 import static com.varankin.io.xml.svg.XmlSvg.*;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -35,6 +42,7 @@ import java.util.Map;
 public class ArchiveView extends DockLayoutPanel
 {
     private static final String IPATH = "images/icons16x16/";
+    private static final String LS_ARCHIVES = "archives";
     private static final String XML_NS_TEMP = "#NS";
     private static final String XML_UN_TEMP = "#OTHER";
     private static final String XML_GRAPHIC = "#GRAPHIC";
@@ -80,6 +88,7 @@ public class ArchiveView extends DockLayoutPanel
     }
 
     private DbNodeServiceAsync dbService;
+    private Storage localStorage;
     private final Tree tree; //TODO CellTree
     
     public ArchiveView()
@@ -111,11 +120,11 @@ public class ArchiveView extends DockLayoutPanel
     private static TreeItem itemOf( DbNode dbn )
     {
         HorizontalPanel hp = new HorizontalPanel();
-        hp.add( new Image( IPATH + "" + iconFileName.getOrDefault( dbn.type(), iconFileName.get( null ) ) ) );
-        hp.add( new Label( String.valueOf( Character.toChars( 0x00A0 ) ) + dbn.name() ) );
+        hp.add( new Image( IPATH + "" + iconFileName.getOrDefault( dbn.getType(), iconFileName.get( null ) ) ) );
+        hp.add( new Label( String.valueOf( Character.toChars( 0x00A0 ) ) + dbn.getName() ) );
 
         TreeItem item = new TreeItem( hp );
-        item.setTitle( dbn.type() + '/' + dbn.zone() );
+        item.setTitle( dbn.getType() + '/' + dbn.getZone() );
         item.setUserObject( dbn );
         item.addTextItem( "Loading..." ); // a hidden placeholder, to allow to open/close children
         return item;
@@ -137,31 +146,69 @@ public class ArchiveView extends DockLayoutPanel
     
     void init()
     {
+        localStorage = Storage.getLocalStorageIfSupported();
         dbService = GWT.create( DbNodeService.class );
-        // obtain root items
         if( dbService != null )
-            dbService.nodesFrom( new DbNode[0], new AsyncCallback<DbNode[]>()
+            dbService.archiveNodes( readLastListOfArchives(), new RootNodesSetup() );
+    }
+    
+    private DbNode[] readLastListOfArchives()
+    {
+        List<DbNode> expected = new LinkedList<>();
+        if( localStorage != null )
+        {
+            if( localStorage != null )
             {
-                @Override
-                public void onFailure( Throwable caught )
-                {
-                    caught.printStackTrace();
-                }
+                // obtain last list of archives
+                String json = localStorage.getItem( LS_ARCHIVES );
+                if( json == null || json.trim().isEmpty() ) json = "";
+                //Window.alert("old local archives: " + json );
+                JsonFactory serializer = GWT.create( JsonFactory.class );
+                for( String item : json.split( "\n" ) )
+                    if( ! item.trim().isEmpty() )
+                    {
+                        AutoBean<DbNodeBean> bean = AutoBeanCodex.decode( serializer, DbNodeBean.class, item );
+                        expected.add( new DbNode( bean.as() ) );
+                    }
+            }
+        }
+        return expected.toArray( new DbNode[0] );
+    }
+    
+    private void saveActualListOfArchives( DbNode[] nodes )
+    {
+        if( localStorage != null )
+        {
+            // reset actual list of archives
+            StringBuilder json = new StringBuilder();
+            for( DbNode dbn : nodes )
+            {
+                JsonFactory serializer = GWT.create( JsonFactory.class );
+                AutoBean<DbNodeBean> bean = serializer.create( DbNodeBean.class );
+                DbNodeBean t = bean.as();
+                t.setName( dbn.getName() );
+                t.setType( dbn.getType() );
+                t.setZone( dbn.getZone() );
+                t.setTag ( dbn.getTag()  );
+                String item = AutoBeanCodex.encode( bean ).getPayload();
+                if( json.length() == 0 ) json.append( '\n' ); // API doesn't allow to handlie array
+                json.append( item );
+            }
+            localStorage.setItem( LS_ARCHIVES, json.toString() );
+            //Window.alert("new local archives: " + json );
+        }
+    }
 
-                @Override
-                public void onSuccess( DbNode[] result )
-                {
-                    // refresh list of children
-                    Tree target = ArchiveView.this.tree;
-                    target.removeItems();
-                    Arrays.stream( result ).forEach( c -> target.addItem( itemOf( c ) ) );
-                }
-            } );
+    private void onDatabaseOpen( DatabaseDialog.DatabaseRequest request )
+    {
     }
     
     private void onClickOpen( ClickEvent event )
     {
-        
+        DatabaseDialog dialog = new DatabaseDialog( this::onDatabaseOpen );
+//        dialog.setPopupPosition( 150, 100 );
+//        dialog.show();
+        dialog.showRelativeTo( (UIObject) event.getSource() );
     }
     
     private void onClickLoad( ClickEvent event )
@@ -222,29 +269,60 @@ public class ArchiveView extends DockLayoutPanel
     private void onOpenEvent( OpenEvent<TreeItem> event )
     {
         // obtain actual children
-        if( dbService == null ) return;
-        dbService.nodesFrom( getItemPath( event.getTarget() ), new AsyncCallback<DbNode[]>()
+        if( dbService != null )
         {
-            @Override
-            public void onFailure( Throwable caught )
-            {
-                caught.printStackTrace();
-            }
-
-            @Override
-            public void onSuccess( DbNode[] result )
-            {
-                // refresh list of children
-                TreeItem target = event.getTarget();
-                target.removeItems();
-                Arrays.stream( result ).forEach( c -> target.addItem( itemOf( c ) ) );
-            }
-        } );
+            TreeItem target = event.getTarget();
+            dbService.nodesFrom( getItemPath( target ), new IncludedNodesSetup( target ) );
+        }
     }
     
     private void onCloseEvent( CloseEvent<TreeItem> event )
     {
         //TODO no expansion then //event.getTarget().removeItems(); // to obtain actual list on the next open
+    }
+    
+    private class RootNodesSetup implements AsyncCallback<DbNode[]>
+    {
+        final Tree target = ArchiveView.this.tree;
+
+        @Override
+        public void onFailure( Throwable caught )
+        {
+            caught.printStackTrace();
+        }
+
+        @Override
+        public void onSuccess( DbNode[] result )
+        {
+            // refresh list of children
+            target.removeItems();
+            Arrays.stream( result ).forEach( c -> target.addItem( itemOf( c ) ) );
+            ArchiveView.this.saveActualListOfArchives( result );
+        }
+    }
+    
+    private static class IncludedNodesSetup implements AsyncCallback<DbNode[]>
+    {
+        final TreeItem target;
+
+        IncludedNodesSetup( TreeItem target )
+        {
+            this.target = target;
+        }
+
+        @Override
+        public void onFailure( Throwable caught )
+        {
+            caught.printStackTrace();
+        }
+
+        @Override
+        public void onSuccess( DbNode[] result )
+        {
+            // refresh list of children
+            target.removeItems();
+            Arrays.stream( result ).forEach( c -> target.addItem( itemOf( c ) ) );
+        }
     }
     
 }

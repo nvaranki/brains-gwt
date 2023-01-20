@@ -53,4 +53,10 @@ public class DbManager
         return new ArrayList<>( archives.keySet() ); //TODO map per Session
     }
     
+    synchronized void destroy()
+    {
+        archives.keySet().forEach( NeoАрхив::закрыть );
+        archives.clear();
+    }
+
 }

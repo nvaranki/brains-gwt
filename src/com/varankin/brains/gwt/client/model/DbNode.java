@@ -6,8 +6,7 @@ import java.io.Serializable;
  * 
  * @author nvara
  */
-//public record DbNode( String name, String type, String zone )
-public final class DbNode implements Serializable
+public final class DbNode implements Serializable, DbNodeBean
 {
     private String name;
     private String type;
@@ -26,23 +25,56 @@ public final class DbNode implements Serializable
         this.tag  = tag;
     }
 
-    public String name()
+    public DbNode( DbNodeBean bean )
+    {
+        this( bean.getName(), bean.getType(), bean.getZone(), bean.getTag() );
+    }
+
+    @Override
+    public String getName()
     {
         return name;
     }
 
-    public String type()
+    @Override
+    public String getType()
     {
         return type;
     }
 
-    public String zone()
+    @Override
+    public String getZone()
     {
         return zone;
     }
 
-    public String tag()
+    @Override
+    public String getTag()
     {
         return tag;
+    }
+    
+    @Override
+    public void setName( String value )
+    {
+        name = value;
+    }
+
+    @Override
+    public void setType( String value )
+    {
+        type = value;
+    }
+
+    @Override
+    public void setZone( String value )
+    {
+        zone = value;
+    }
+
+    @Override
+    public void setTag( String value )
+    {
+        tag = value;
     }
 }

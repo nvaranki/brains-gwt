@@ -21,6 +21,7 @@
     <copy todir="war/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet.jar" />
     <copy todir="war/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet-deps.jar" />
     <!-- Add any additional server libs that need to be copied -->
+    <copy todir="war/WEB-INF/lib" file="lib/gson-2.10.1.jar" />
     <copy todir="war/WEB-INF/lib" file="../brains-appl/dist/brains-appl.jar" />
     <copy todir="war/WEB-INF/lib" file="../brains-db-api/dist/brains-db-api.jar" />
     <copy todir="war/WEB-INF/lib"><fileset dir="../brains-appl/dist/lib" includes="**" /></copy>

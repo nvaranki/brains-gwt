@@ -1,18 +1,13 @@
 package com.varankin.brains.gwt.client.view;
 
-import com.varankin.brains.gwt.client.view.MenuView;
-import com.varankin.brains.gwt.client.view.BrowserView;
-import com.varankin.brains.gwt.client.view.ArchiveView;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.StackLayoutPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextArea;
-import com.varankin.brains.gwt.client.service.db.DbNodeServiceAsync;
 
 /**
  *
