@@ -22,9 +22,7 @@
     <copy todir="war/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet-deps.jar" />
     <!-- Add any additional server libs that need to be copied -->
     <copy todir="war/WEB-INF/lib" file="lib/gson-2.10.1.jar" />
-    <copy todir="war/WEB-INF/lib" file="../brains-appl/dist/brains-appl.jar" />
-    <copy todir="war/WEB-INF/lib" file="../brains-db-api/dist/brains-db-api.jar" />
-    <copy todir="war/WEB-INF/lib"><fileset dir="../brains-appl/dist/lib" includes="**" /></copy>
+    <copy todir="war/WEB-INF/lib" file="../brains-db-neo4j/dist/brains-db-neo4j.jar" />
     <copy todir="war/WEB-INF/lib"><fileset dir="../brains-db-neo4j/dist/lib" includes="**" /></copy>
   </target>
 
@@ -145,6 +143,8 @@ Test targets suppressed because -junit argument was not specified when running w
 
   <target name="clean" description="Cleans this project">
     <delete dir="war/WEB-INF/classes" failonerror="false" />
+    <delete dir="war/WEB-INF/lib" failonerror="false" />
+    <delete dir="war/WEB-INF/deploy" failonerror="false" />
     <delete dir="war/thinkerapplication" failonerror="false" />
   </target>
 
