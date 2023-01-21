@@ -1,8 +1,9 @@
 package com.varankin.brains.gwt.client.service.db;
 
+import com.varankin.brains.gwt.shared.dto.db.DatabaseRequest;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.varankin.brains.gwt.client.model.DbNode;
+import com.varankin.brains.gwt.shared.dto.db.DbNode;
 
 /**
  * The client-side stub for the RPC service.

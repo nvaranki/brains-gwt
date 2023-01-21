@@ -1,5 +1,6 @@
-package com.varankin.brains.gwt.client.model;
+package com.varankin.brains.gwt.shared.dto.db;
 
+import com.varankin.brains.gwt.client.model.DbNodeBean;
 import java.io.Serializable;
 
 /**

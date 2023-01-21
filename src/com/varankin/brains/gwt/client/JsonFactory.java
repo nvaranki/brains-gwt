@@ -1,4 +1,4 @@
-package com.varankin.brains.gwt.shared;
+package com.varankin.brains.gwt.client;
 
 import com.google.web.bindery.autobean.shared.AutoBean;
 import com.google.web.bindery.autobean.shared.AutoBeanFactory;

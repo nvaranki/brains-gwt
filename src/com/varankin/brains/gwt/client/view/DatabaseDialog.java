@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.varankin.brains.gwt.client.service.db.DatabaseRequest;
+import com.varankin.brains.gwt.shared.dto.db.DatabaseRequest;
 import java.util.function.Consumer;
 
 /**

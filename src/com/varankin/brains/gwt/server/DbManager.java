@@ -1,7 +1,7 @@
 package com.varankin.brains.gwt.server;
 
 import com.varankin.brains.db.neo4j.local.NeoАрхив;
-import com.varankin.brains.gwt.client.service.db.DatabaseRequest;
+import com.varankin.brains.gwt.shared.dto.db.DatabaseRequest;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;

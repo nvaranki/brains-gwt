@@ -1,4 +1,4 @@
-package com.varankin.brains.gwt.client.service.db;
+package com.varankin.brains.gwt.shared.dto.db;
 
 import java.io.Serializable;
 

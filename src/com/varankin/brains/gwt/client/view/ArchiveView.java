@@ -1,6 +1,6 @@
 package com.varankin.brains.gwt.client.view;
 
-import com.varankin.brains.gwt.client.service.db.DatabaseRequest;
+import com.varankin.brains.gwt.shared.dto.db.DatabaseRequest;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -24,11 +24,11 @@ import com.google.web.bindery.autobean.shared.AutoBeanCodex;
 import static com.varankin.brains.db.xml.Xml.PI_ELEMENT;
 import static com.varankin.brains.db.xml.Xml.XML_CDATA;
 import static com.varankin.brains.db.xml.XmlBrains.*;
-import com.varankin.brains.gwt.client.model.DbNode;
+import com.varankin.brains.gwt.shared.dto.db.DbNode;
 import com.varankin.brains.gwt.client.model.DbNodeBean;
 import com.varankin.brains.gwt.client.service.db.DbNodeService;
 import com.varankin.brains.gwt.client.service.db.DbNodeServiceAsync;
-import com.varankin.brains.gwt.shared.JsonFactory;
+import com.varankin.brains.gwt.client.JsonFactory;
 import static com.varankin.io.xml.svg.XmlSvg.*;
 import java.util.ArrayList;
 import java.util.Arrays;

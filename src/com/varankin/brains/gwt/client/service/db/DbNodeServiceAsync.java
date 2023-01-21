@@ -1,7 +1,8 @@
 package com.varankin.brains.gwt.client.service.db;
 
+import com.varankin.brains.gwt.shared.dto.db.DatabaseRequest;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.varankin.brains.gwt.client.model.DbNode;
+import com.varankin.brains.gwt.shared.dto.db.DbNode;
 
 /**
  * The async counterpart of <code>DbService</code>.
