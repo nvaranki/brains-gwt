@@ -10,8 +10,9 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- *
- * @author nvara
+ * Контроллер операций над базами данных.
+ * 
+ * @author &copy; 2023 Николай Варанкин
  */
 public class DbManager
 {

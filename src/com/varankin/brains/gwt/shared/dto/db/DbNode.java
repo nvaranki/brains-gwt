@@ -4,8 +4,9 @@ import com.varankin.brains.gwt.client.JsonFactory.DbNodeBean;
 import java.io.Serializable;
 
 /**
+ * Общий DTO элемента архива.
  * 
- * @author nvara
+ * @author &copy; 2023 Николай Варанкин
  */
 public final class DbNode implements Serializable, DbNodeBean
 {

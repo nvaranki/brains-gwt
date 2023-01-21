@@ -6,8 +6,9 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.varankin.brains.gwt.shared.dto.db.DbNode;
 
 /**
- * The client-side stub for the RPC service.
+ * The client-side stub for the GWT RPC service.
  * 
+ * @author &copy; 2023 Николай Варанкин
  */
 @RemoteServiceRelativePath("db/node/children") // copy path to war/WEB-INF/web.xml
 public interface DbNodeService extends RemoteService 

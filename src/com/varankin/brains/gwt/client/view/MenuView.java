@@ -5,8 +5,9 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.MenuBar;
 
 /**
- *
- * @author nvara
+ * Построитель главного меню команд приложения.
+ * 
+ * @author &copy; 2023 Николай Варанкин
  */
 public class MenuView extends MenuBar
 {

@@ -22,7 +22,9 @@ import java.util.Objects;
 
 
 /**
- * The server-side implementation of the RPC service.
+ * The server-side implementation of the GWT RPC service.
+ * 
+ * @author &copy; 2023 Николай Варанкин
  */
 public class DbNodeServiceImpl 
         extends RemoteServiceServlet 

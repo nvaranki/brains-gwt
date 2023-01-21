@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  *
- * @author nvara
+ * @author &copy; 2023 Николай Варанкин
  */
 public class DatabaseRequest implements Serializable
 {

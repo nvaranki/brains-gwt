@@ -38,8 +38,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
- * @author nvara
+ * Панель навигатора по архивам. 
+ * 
+ * @author &copy; 2023 Николай Варанкин
  */
 public class ArchiveView extends DockLayoutPanel
 {

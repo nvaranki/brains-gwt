@@ -6,6 +6,8 @@ import com.varankin.brains.gwt.shared.dto.db.DbNode;
 
 /**
  * The async counterpart of <code>DbService</code>.
+ * 
+ * @author &copy; 2023 Николай Варанкин
  */
 public interface DbNodeServiceAsync 
 {

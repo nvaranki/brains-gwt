@@ -15,8 +15,9 @@ import com.varankin.brains.gwt.shared.dto.db.DatabaseRequest;
 import java.util.function.Consumer;
 
 /**
- *
- * @author nvara
+ * Форма получения доступа к БД. 
+ * 
+ * @author &copy; 2023 Николай Варанкин
  */
 public class DatabaseDialog
         extends DialogBox

@@ -4,8 +4,9 @@ import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 
 /**
- *
- * @author nvara
+ * Панель навигатора по процессам. 
+ * 
+ * @author &copy; 2023 Николай Варанкин
  */
 public class BrowserView extends Tree //TODO CellTree
 {

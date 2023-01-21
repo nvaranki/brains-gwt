@@ -10,8 +10,9 @@ import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextArea;
 
 /**
- *
- * @author nvara
+ * Построитель главной экранной формы приложения.
+ * 
+ * @author &copy; 2023 Николай Варанкин
  */
 public class MainView extends DockLayoutPanel
 {

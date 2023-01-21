@@ -4,8 +4,9 @@ import com.google.web.bindery.autobean.shared.AutoBean;
 import com.google.web.bindery.autobean.shared.AutoBeanFactory;
 
 /**
- *
- * @author nvara
+ * JSON helper utility.
+ * 
+ * @author &copy; 2023 Николай Варанкин
  */
 public interface JsonFactory extends AutoBeanFactory 
 {
