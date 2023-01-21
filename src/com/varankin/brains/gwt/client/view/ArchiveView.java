@@ -129,90 +129,6 @@ public class ArchiveView extends DockLayoutPanel
             dbService.archiveNodes( readLastListOfArchives(), new RootNodesSetup() );
     }
     
-    //<editor-fold defaultstate="collapsed" desc="items">
-    
-    private static TreeItem itemOf( DbNode dbn )
-    {
-        HorizontalPanel hp = new HorizontalPanel();
-        hp.add( new Image( IPATH + "" + iconFileName.getOrDefault( dbn.getType(), iconFileName.get( null ) ) ) );
-        hp.add( new Label( String.valueOf( Character.toChars( 0x00A0 ) ) + dbn.getName() ) );
-        
-        TreeItem item = new TreeItem( hp );
-        item.setTitle( dbn.getType() + '/' + dbn.getZone() );
-        item.setUserObject( dbn );
-        item.addTextItem( "Loading..." ); // a hidden placeholder, to allow to open/close children
-        return item;
-    }
-    
-    private static DbNode[] getItemPath( TreeItem item )
-    {
-        List<DbNode> path = new LinkedList<>();
-        for( ; item != null; item = item.getParentItem() )
-        {
-            Object dbn = item.getUserObject();
-            if( dbn instanceof DbNode )
-                path.add( 0, (DbNode) dbn );
-            else
-                System.err.println( "TreeItem user object error" );
-        }
-        return path.toArray( new DbNode[0] );
-    }
-    
-    //</editor-fold>
-    
-    //<editor-fold defaultstate="collapsed" desc="storage">
-    
-    private DbNode[] readLastListOfArchives()
-    {
-        List<DbNode> expected = new LinkedList<>();
-        if( localStorage != null )
-        {
-            if( localStorage != null )
-            {
-                // obtain last list of archives
-                String json = localStorage.getItem( LS_ARCHIVES );
-                //Window.alert("saved local archives: " + json );
-                if( json == null || json.trim().isEmpty() ) json = "";
-                //Window.alert("old local archives: " + json );
-                JsonFactory serializer = GWT.create( JsonFactory.class );
-                for( String item : json.split( LS_SPLITTER ) )
-                    if( ! item.trim().isEmpty() )
-                    {
-                        //Window.alert("saved local archive: " + item );
-                        AutoBean<DbNodeBean> bean = AutoBeanCodex.decode( serializer, DbNodeBean.class, item );
-                        expected.add( new DbNode( bean.as() ) );
-                    }
-            }
-        }
-        return expected.toArray( new DbNode[expected.size()] );
-    }
-    
-    private void saveActualListOfArchives( DbNode[] nodes )
-    {
-        if( localStorage != null )
-        {
-            // reset actual list of archives
-            StringBuilder json = new StringBuilder();
-            for( DbNode dbn : nodes )
-            {
-                JsonFactory serializer = GWT.create( JsonFactory.class );
-                AutoBean<DbNodeBean> bean = serializer.create( DbNodeBean.class );
-                DbNodeBean t = bean.as();
-                t.setName( dbn.getName() );
-                t.setType( dbn.getType() );
-                t.setZone( dbn.getZone() );
-                t.setTag ( dbn.getTag()  );
-                String item = AutoBeanCodex.encode( bean ).getPayload();
-                if( json.length() > 0 ) json.append( LS_SPLITTER ); // API doesn't allow to handlie array
-                json.append( item );
-            }
-            localStorage.setItem( LS_ARCHIVES, json.toString() );
-            //Window.alert("new local archives: " + json );
-        }
-    }
-    
-    //</editor-fold>
-    
     private void onDatabaseOpen( DatabaseRequest request )
     {
         //Window.alert("DB path: " + request.path + ( request.create ? " [new]" : " [open]" ) );
@@ -377,6 +293,90 @@ public class ArchiveView extends DockLayoutPanel
             // refresh list of children
             target.removeItems();
             Arrays.stream( result ).forEach( c -> target.addItem( itemOf( c ) ) );
+        }
+    }
+    
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="items">
+    
+    private static TreeItem itemOf( DbNode dbn )
+    {
+        HorizontalPanel hp = new HorizontalPanel();
+        hp.add( new Image( IPATH + "" + iconFileName.getOrDefault( dbn.getType(), iconFileName.get( null ) ) ) );
+        hp.add( new Label( String.valueOf( Character.toChars( 0x00A0 ) ) + dbn.getName() ) );
+        
+        TreeItem item = new TreeItem( hp );
+        item.setTitle( dbn.getType() + '/' + dbn.getZone() );
+        item.setUserObject( dbn );
+        item.addTextItem( "Loading..." ); // a hidden placeholder, to allow to open/close children
+        return item;
+    }
+    
+    private static DbNode[] getItemPath( TreeItem item )
+    {
+        List<DbNode> path = new LinkedList<>();
+        for( ; item != null; item = item.getParentItem() )
+        {
+            Object dbn = item.getUserObject();
+            if( dbn instanceof DbNode )
+                path.add( 0, (DbNode) dbn );
+            else
+                System.err.println( "TreeItem user object error" );
+        }
+        return path.toArray( new DbNode[0] );
+    }
+    
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="storage">
+    
+    private DbNode[] readLastListOfArchives()
+    {
+        List<DbNode> expected = new LinkedList<>();
+        if( localStorage != null )
+        {
+            if( localStorage != null )
+            {
+                // obtain last list of archives
+                String json = localStorage.getItem( LS_ARCHIVES );
+                //Window.alert("saved local archives: " + json );
+                if( json == null || json.trim().isEmpty() ) json = "";
+                //Window.alert("old local archives: " + json );
+                JsonFactory serializer = GWT.create( JsonFactory.class );
+                for( String item : json.split( LS_SPLITTER ) )
+                    if( ! item.trim().isEmpty() )
+                    {
+                        //Window.alert("saved local archive: " + item );
+                        AutoBean<DbNodeBean> bean = AutoBeanCodex.decode( serializer, DbNodeBean.class, item );
+                        expected.add( new DbNode( bean.as() ) );
+                    }
+            }
+        }
+        return expected.toArray( new DbNode[expected.size()] );
+    }
+    
+    private void saveActualListOfArchives( DbNode[] nodes )
+    {
+        if( localStorage != null )
+        {
+            // reset actual list of archives
+            StringBuilder json = new StringBuilder();
+            for( DbNode dbn : nodes )
+            {
+                JsonFactory serializer = GWT.create( JsonFactory.class );
+                AutoBean<DbNodeBean> bean = serializer.create( DbNodeBean.class );
+                DbNodeBean t = bean.as();
+                t.setName( dbn.getName() );
+                t.setType( dbn.getType() );
+                t.setZone( dbn.getZone() );
+                t.setTag ( dbn.getTag()  );
+                String item = AutoBeanCodex.encode( bean ).getPayload();
+                if( json.length() > 0 ) json.append( LS_SPLITTER ); // API doesn't allow to handlie array
+                json.append( item );
+            }
+            localStorage.setItem( LS_ARCHIVES, json.toString() );
+            //Window.alert("new local archives: " + json );
         }
     }
     
