@@ -1,5 +1,6 @@
 package com.varankin.brains.gwt.client.view;
 
+import com.varankin.brains.gwt.client.service.db.DatabaseRequest;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -29,6 +30,7 @@ import com.varankin.brains.gwt.client.service.db.DbNodeService;
 import com.varankin.brains.gwt.client.service.db.DbNodeServiceAsync;
 import com.varankin.brains.gwt.shared.JsonFactory;
 import static com.varankin.io.xml.svg.XmlSvg.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -43,6 +45,7 @@ public class ArchiveView extends DockLayoutPanel
 {
     private static final String IPATH = "images/icons16x16/";
     private static final String LS_ARCHIVES = "archives";
+    private static final String LS_SPLITTER = "\n";
     private static final String XML_NS_TEMP = "#NS";
     private static final String XML_UN_TEMP = "#OTHER";
     private static final String XML_GRAPHIC = "#GRAPHIC";
@@ -109,7 +112,7 @@ public class ArchiveView extends DockLayoutPanel
         toolbar.add( new PushButton( new Image( IPATH + "file-export.png" ), this::onClickExportXml ) );
         toolbar.add( new PushButton( new Image( IPATH + "file-export.png" ), this::onClickExportPic ) );
         toolbar.add( new PushButton( new Image( IPATH + "properties.png" ), this::onClickProperties ) );
-        addWest( toolbar, 40 );
+        addWest( toolbar, 34 );
         
         tree = new Tree();
         tree.addOpenHandler( this::onOpenEvent );
@@ -117,12 +120,22 @@ public class ArchiveView extends DockLayoutPanel
         add( new ScrollPanel( tree ) );
     }
     
+    void init()
+    {
+        localStorage = Storage.getLocalStorageIfSupported();
+        dbService = GWT.create( DbNodeService.class );
+        if( dbService != null )
+            dbService.archiveNodes( readLastListOfArchives(), new RootNodesSetup() );
+    }
+    
+    //<editor-fold defaultstate="collapsed" desc="items">
+    
     private static TreeItem itemOf( DbNode dbn )
     {
         HorizontalPanel hp = new HorizontalPanel();
         hp.add( new Image( IPATH + "" + iconFileName.getOrDefault( dbn.getType(), iconFileName.get( null ) ) ) );
         hp.add( new Label( String.valueOf( Character.toChars( 0x00A0 ) ) + dbn.getName() ) );
-
+        
         TreeItem item = new TreeItem( hp );
         item.setTitle( dbn.getType() + '/' + dbn.getZone() );
         item.setUserObject( dbn );
@@ -144,13 +157,9 @@ public class ArchiveView extends DockLayoutPanel
         return path.toArray( new DbNode[0] );
     }
     
-    void init()
-    {
-        localStorage = Storage.getLocalStorageIfSupported();
-        dbService = GWT.create( DbNodeService.class );
-        if( dbService != null )
-            dbService.archiveNodes( readLastListOfArchives(), new RootNodesSetup() );
-    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="storage">
     
     private DbNode[] readLastListOfArchives()
     {
@@ -161,18 +170,20 @@ public class ArchiveView extends DockLayoutPanel
             {
                 // obtain last list of archives
                 String json = localStorage.getItem( LS_ARCHIVES );
+                //Window.alert("saved local archives: " + json );
                 if( json == null || json.trim().isEmpty() ) json = "";
                 //Window.alert("old local archives: " + json );
                 JsonFactory serializer = GWT.create( JsonFactory.class );
-                for( String item : json.split( "\n" ) )
+                for( String item : json.split( LS_SPLITTER ) )
                     if( ! item.trim().isEmpty() )
                     {
+                        //Window.alert("saved local archive: " + item );
                         AutoBean<DbNodeBean> bean = AutoBeanCodex.decode( serializer, DbNodeBean.class, item );
                         expected.add( new DbNode( bean.as() ) );
                     }
             }
         }
-        return expected.toArray( new DbNode[0] );
+        return expected.toArray( new DbNode[expected.size()] );
     }
     
     private void saveActualListOfArchives( DbNode[] nodes )
@@ -191,24 +202,31 @@ public class ArchiveView extends DockLayoutPanel
                 t.setZone( dbn.getZone() );
                 t.setTag ( dbn.getTag()  );
                 String item = AutoBeanCodex.encode( bean ).getPayload();
-                if( json.length() == 0 ) json.append( '\n' ); // API doesn't allow to handlie array
+                if( json.length() > 0 ) json.append( LS_SPLITTER ); // API doesn't allow to handlie array
                 json.append( item );
             }
             localStorage.setItem( LS_ARCHIVES, json.toString() );
             //Window.alert("new local archives: " + json );
         }
     }
-
-    private void onDatabaseOpen( DatabaseDialog.DatabaseRequest request )
+    
+    //</editor-fold>
+    
+    private void onDatabaseOpen( DatabaseRequest request )
     {
+        //Window.alert("DB path: " + request.path + ( request.create ? " [new]" : " [open]" ) );
+        if( dbService != null )
+            dbService.archiveNodeAt( request, new AddRootNode() );
     }
+
+    //<editor-fold defaultstate="collapsed" desc="events">
     
     private void onClickOpen( ClickEvent event )
     {
         DatabaseDialog dialog = new DatabaseDialog( this::onDatabaseOpen );
+        dialog.showRelativeTo( (UIObject) event.getSource() );
 //        dialog.setPopupPosition( 150, 100 );
 //        dialog.show();
-        dialog.showRelativeTo( (UIObject) event.getSource() );
     }
     
     private void onClickLoad( ClickEvent event )
@@ -281,16 +299,52 @@ public class ArchiveView extends DockLayoutPanel
         //TODO no expansion then //event.getTarget().removeItems(); // to obtain actual list on the next open
     }
     
-    private class RootNodesSetup implements AsyncCallback<DbNode[]>
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="callbacks">
+    
+    private class AddRootNode implements AsyncCallback<DbNode>
     {
         final Tree target = ArchiveView.this.tree;
-
+        
         @Override
         public void onFailure( Throwable caught )
         {
             caught.printStackTrace();
         }
-
+        
+        @Override
+        public void onSuccess( DbNode result )
+        {
+            if( result != null )
+            {
+                // refresh list of children
+                target.addItem( itemOf( result ) );
+                // remember updated list of children
+                int itemCount = target.getItemCount();
+                List<DbNode> current = new ArrayList<>( itemCount );
+                for( int i = 0; i < itemCount; i++ )
+                    current.add( (DbNode) target.getItem( i ).getUserObject() );
+                ArchiveView.this.saveActualListOfArchives( current.toArray( new DbNode[itemCount] ) );
+            }
+            else
+            {
+                Window.alert( "Archive wasn't open." );
+                System.err.println( "Archive wasn't open." );
+            }
+        }
+    }
+    
+    private class RootNodesSetup implements AsyncCallback<DbNode[]>
+    {
+        final Tree target = ArchiveView.this.tree;
+        
+        @Override
+        public void onFailure( Throwable caught )
+        {
+            caught.printStackTrace();
+        }
+        
         @Override
         public void onSuccess( DbNode[] result )
         {
@@ -304,18 +358,18 @@ public class ArchiveView extends DockLayoutPanel
     private static class IncludedNodesSetup implements AsyncCallback<DbNode[]>
     {
         final TreeItem target;
-
+        
         IncludedNodesSetup( TreeItem target )
         {
             this.target = target;
         }
-
+        
         @Override
         public void onFailure( Throwable caught )
         {
             caught.printStackTrace();
         }
-
+        
         @Override
         public void onSuccess( DbNode[] result )
         {
@@ -324,5 +378,7 @@ public class ArchiveView extends DockLayoutPanel
             Arrays.stream( result ).forEach( c -> target.addItem( itemOf( c ) ) );
         }
     }
+    
+    //</editor-fold>
     
 }

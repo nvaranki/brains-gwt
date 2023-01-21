@@ -7,9 +7,10 @@ import com.varankin.brains.db.type.DbАтрибутный;
 import com.varankin.brains.db.Коллекция;
 import com.varankin.brains.db.Транзакция;
 import com.varankin.brains.gwt.client.model.DbNode;
+import com.varankin.brains.gwt.client.service.db.DatabaseRequest;
 import com.varankin.brains.gwt.client.service.db.DbNodeService;
-import com.varankin.brains.gwt.shared.FieldVerifier;
 import com.varankin.characteristic.Именованный;
+import java.io.File;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -27,10 +28,6 @@ public class DbNodeServiceImpl
         extends RemoteServiceServlet 
         implements DbNodeService 
 {
-    public DbNodeServiceImpl()
-    {
-    }
-    
     @Override
     public void destroy()
     {
@@ -38,53 +35,46 @@ public class DbNodeServiceImpl
         super.destroy();
     }
 
-  public String greetServer(String input) throws IllegalArgumentException {
-    // Verify that the input is valid. 
-    if (!FieldVerifier.isValidName(input)) {
-      // If the input is not valid, throw an IllegalArgumentException back to
-      // the client.
-      throw new IllegalArgumentException(
-          "Name must be at least 4 characters long");
+    //<editor-fold defaultstate="expanded" desc="entries">
+    
+    @Override
+    public DbNode archiveNodeAt( DatabaseRequest request ) throws IllegalArgumentException
+    {
+        try
+        {
+            NeoАрхив archive = DbManager.getInstance().open( request );
+            if( archive != null )
+                try( Транзакция транзакция = archive.транзакция() )
+                {
+                    DbNode dbn = instanceOfDbNode( archive );
+                    транзакция.завершить( true );
+                    return dbn;
+                }
+            else
+                System.err.println( "No archive " + ( request.create ? "created" : "exists" ) + " at \"" + request.path + "\"" );
+        }
+        catch( Exception ex )
+        {
+            ex.printStackTrace();
+        }
+        return null;
     }
-
-    String serverInfo = getServletContext().getServerInfo();
-    String userAgent = getThreadLocalRequest().getHeader("User-Agent");
-
-    // Escape data from the client to avoid cross-site script vulnerabilities.
-    input = escapeHtml(input);
-    userAgent = escapeHtml(userAgent);
-
-    return "Hello, " + input + "!<br><br>I am running " + serverInfo
-        + ".<br><br>It looks like you are using:<br>" + userAgent;
-  }
-
-  /**
-   * Escape an html string. Escaping data received from the client helps to
-   * prevent cross-site script vulnerabilities.
-   * 
-   * @param html the html string to escape
-   * @return the escaped string
-   */
-  private String escapeHtml(String html) {
-    if (html == null) {
-      return null;
-    }
-    return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(
-        ">", "&gt;");
-  }
-        
+    
     @Override
     public DbNode[] archiveNodes( DbNode[] expected ) throws IllegalArgumentException
     {
         List<DbNode> result = new LinkedList<>();
-        Collection<NeoАрхив> loaded = DbManager.getInstance().all();
-        for( DbNode dbn : expected ) // ëxpected is probably smaller than amount of loaded archives
-            for( DbАрхив архив : loaded )
+        for( DbNode dbn : expected ) // expected is probably smaller than amount of loaded archives
+        {
+            System.err.println( "Loading saved node: " + dbn.getTag() );
+            DbNode exists = null;
+            for( DbАрхив архив : DbManager.getInstance().all() )
                 try( Транзакция транзакция = архив.транзакция() )
                 {
                     if( equals( архив, dbn ) )
                     {
-                        result.add( instanceOfDbNode( архив ) );
+                        // supply previously opened archive
+                        exists = instanceOfDbNode( архив );
                         транзакция.завершить( true );
                         break;
                     }
@@ -94,6 +84,27 @@ public class DbNodeServiceImpl
                 {
                     ex.printStackTrace();
                 }
+            if( exists == null )
+                try
+                {
+                    // attempt to open referenced archive
+                    DbАрхив архив = DbManager.getInstance().open(
+                            new DatabaseRequest( DbManager.unpack( new File( dbn.getTag() ) ), false ) );
+                    if( архив != null )
+                        try( Транзакция транзакция = архив.транзакция() )
+                        {
+                            // supply archive that still exists
+                            exists = instanceOfDbNode( архив );
+                            транзакция.завершить( true );
+                        }
+                }
+                catch( Exception ex )
+                {
+                    ex.printStackTrace();
+                }
+            if( exists != null )
+                result.add( exists );
+        }
         result.sort( Comparator.comparing( DbNode::getZone )
                 .thenComparing( DbNode::getType ).thenComparing( DbNode::getName ) );
         System.err.println( "Archive nodes returned: " + result.size() );
@@ -114,7 +125,7 @@ public class DbNodeServiceImpl
             DbАтрибутный target = null;
             for( DbNode dbn : path )
             {
-                Collection<? extends DbАтрибутный> candidates = target == null ? 
+                Collection<? extends DbАтрибутный> candidates = target == null ?
                         DbManager.getInstance().all() : allChildren( target );
                 target = null;
                 for( DbАтрибутный dba : candidates )
@@ -152,9 +163,13 @@ public class DbNodeServiceImpl
         return result.toArray( DbNode[]::new );
     }
     
-    private static Collection<DbАтрибутный> allChildren( DbАтрибутный target ) 
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="utilities">
+    
+    private static Collection<DbАтрибутный> allChildren( DbАтрибутный target )
     {
-        if( target == null ) 
+        if( target == null )
         {
             System.err.println( "No match of UI to DB" );
             return Collections.emptyList();
@@ -164,14 +179,14 @@ public class DbNodeServiceImpl
             {
                 Collection<DbАтрибутный> result  = new LinkedList<>();
                 for( Method m : target.getClass().getMethods() )
-                    if( Modifier.isPublic( m.getModifiers() ) 
-                        && ! Modifier.isStatic( m.getModifiers() ) 
-                        && Коллекция.class.isAssignableFrom( m.getReturnType() )
-                        && m.getParameterCount() == 0 )
-                {
-                    m.setAccessible( true );
-                    result.addAll( Collection.class.cast( m.invoke( target ) ) );
-                }
+                    if( Modifier.isPublic( m.getModifiers() )
+                            && ! Modifier.isStatic( m.getModifiers() )
+                            && Коллекция.class.isAssignableFrom( m.getReturnType() )
+                            && m.getParameterCount() == 0 )
+                    {
+                        m.setAccessible( true );
+                        result.addAll( Collection.class.cast( m.invoke( target ) ) );
+                    }
                 транзакция.завершить( true );
                 return result;
             }
@@ -181,14 +196,14 @@ public class DbNodeServiceImpl
                 return Collections.emptyList();
             }
     }
-
+    
     private static DbNode instanceOfDbNode( DbАтрибутный dba )
     {
         return new DbNode(
-            name( dba ), 
-            dba.тип().НАЗВАНИЕ, 
-            Objects.requireNonNullElse( dba.тип().ЗОНА, "" ),
-            dba.отметка() );
+                name( dba ),
+                dba.тип().НАЗВАНИЕ,
+                Objects.requireNonNullElse( dba.тип().ЗОНА, "" ),
+                dba.отметка() );
     }
     
     private static boolean equals( DbАтрибутный dba, DbNode dbn )
@@ -198,23 +213,24 @@ public class DbNodeServiceImpl
         String zone = Objects.requireNonNullElse( dba.тип().ЗОНА, "" );
         String tag  = dba.отметка();
         //System.out.printf( "%s <> %s, %s <> %s, %s <> %s \n", dbn.name(), name, dbn.type(), type, dbn.zone(), zone );
-        return Objects.equals( dbn.getName(), name ) 
-            && Objects.equals( dbn.getType(), type ) 
-            && Objects.equals( dbn.getZone(), zone )
-            && Objects.equals( dbn.getTag(),  tag  );
+        return Objects.equals( dbn.getName(), name )
+                && Objects.equals( dbn.getType(), type )
+                && Objects.equals( dbn.getZone(), zone )
+                && Objects.equals( dbn.getTag(),  tag  );
     }
     
     private static String name( DbАтрибутный dba )
     {
-        return dba instanceof Именованный ? 
-            Objects.requireNonNullElse( nullable( ( (Именованный) dba ).название() ), dba.тип().НАЗВАНИЕ ) : 
-            dba.тип().НАЗВАНИЕ;
+        return dba instanceof Именованный ?
+                Objects.requireNonNullElse( nullable( ( (Именованный) dba ).название() ), dba.тип().НАЗВАНИЕ ) :
+                dba.тип().НАЗВАНИЕ;
     }
-
+    
     @Deprecated //TODO check why it happens
     private static String nullable( String text )
     {
         return text == null || text.isBlank() ? null : text;
     }
-
+    
+    //</editor-fold>
 }

@@ -2,6 +2,7 @@ package com.varankin.brains.gwt.client.view;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -10,6 +11,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.varankin.brains.gwt.client.service.db.DatabaseRequest;
 import java.util.function.Consumer;
 
 /**
@@ -29,22 +31,26 @@ public class DatabaseDialog
         this.actor = actor;
         setText( "Create/Open Database" ); // caption
         
-        HorizontalPanel path = new HorizontalPanel();
         textBoxPath = new TextBox();
+        textBoxPath.addValueChangeHandler( this::onDbNameChange );
+        
+        HorizontalPanel path = new HorizontalPanel();
         path.add( textBoxPath );
         
-        HorizontalPanel create = new HorizontalPanel();
         checkBoxCreate = new CheckBox();
-        checkBoxCreate.addClickHandler( this::onClickCreate );
+        checkBoxCreate.addClickHandler( this::onChangeCreate );
+        
+        HorizontalPanel create = new HorizontalPanel();
         create.add( checkBoxCreate );
         create.add( new Label( "Create new database" ) );
         
         VerticalPanel fields = new VerticalPanel();
-        fields.add( new Label( "Path to database:" ) );
+        fields.add( new Label( "Database name:" ) );
         fields.add( path );
         fields.add( create );
         
         buttonOpen = new Button( "Open", this::onClickOpen );
+        buttonOpen.setEnabled( false );
         Button cancel = new Button( "Cancel", this::onClickCancel );
         
         HorizontalPanel buttons = new HorizontalPanel();
@@ -61,6 +67,14 @@ public class DatabaseDialog
         textBoxPath.setFocus( true );
     }
     
+    private void onDbNameChange( ValueChangeEvent<String> event )
+    {
+        String text = event.getValue();
+        boolean disable = text.trim().isEmpty()
+            || text.contains( "." ) || text.contains( "/" ) || text.contains( "\\" ); //TODO allow long path
+        buttonOpen.setEnabled( ! disable );
+    }
+    
     private void onClickOpen( ClickEvent event )
     {
         hide();
@@ -72,21 +86,9 @@ public class DatabaseDialog
         hide();
     }
     
-    private void onClickCreate( ClickEvent event )
+    private void onChangeCreate( ClickEvent event )
     {
         buttonOpen.setText( checkBoxCreate.getValue()  ? "Create" : "Open" );
-    }
-    
-    public static class DatabaseRequest
-    {
-        public final String path;
-        public final boolean create;
-
-        public DatabaseRequest( String path, boolean create )
-        {
-            this.path = path;
-            this.create = create;
-        }
     }
     
 }
