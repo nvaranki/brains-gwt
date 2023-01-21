@@ -13,6 +13,7 @@
 /war/WEB-INF/deploy/
 /war/WEB-INF/lib/
 ThinkerApplication.war
+/war/thinkerapplication/
 *.gwt.rpc
 *.cache.js
 compilation-mappings.txt
