@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.StackLayoutPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Построитель главной экранной формы приложения.
@@ -18,6 +19,7 @@ public class MainView extends DockLayoutPanel
 {
     private final ArchiveView archive;
     private final BrowserView browser;
+    private final TabLayoutPanel tabs;
 
     public MainView()
     {
@@ -29,7 +31,7 @@ public class MainView extends DockLayoutPanel
         browsers.add( archive, "Archives", 2 );
         browsers.add( new ScrollPanel( browser ), "Processes", 2 );
 
-        TabLayoutPanel tabs = new TabLayoutPanel( 2, Unit.EM );
+        tabs = new TabLayoutPanel( 2, Unit.EM );
         tabs.add( new Label("TODO Quick Start is here"), "Quick Start" );
         tabs.add( new Label("TODO Analyzer is here"), "Analyzer" );
         tabs.add( new Label("TODO Summer is here"), "Summer" );
@@ -49,6 +51,20 @@ public class MainView extends DockLayoutPanel
     {
         archive.init();
         browser.init();
+    }
+
+    public final TabLayoutPanel getTabs()
+    {
+        return tabs;
+    }
+    
+    static MainView getRootPanel( Widget widget )
+    {
+        for( ; widget != null; widget = widget.getParent() )
+            if( widget instanceof MainView )
+                return (MainView) widget;
+        System.err.println( "No MainView found to hold " + widget );
+        return null;
     }
     
 }

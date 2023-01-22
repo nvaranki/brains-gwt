@@ -1,6 +1,5 @@
 package com.varankin.brains.gwt.client.view;
 
-import com.varankin.brains.gwt.shared.dto.db.DatabaseRequest;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -11,6 +10,7 @@ import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -25,11 +25,12 @@ import com.google.web.bindery.autobean.shared.AutoBeanCodex;
 import static com.varankin.brains.db.xml.Xml.PI_ELEMENT;
 import static com.varankin.brains.db.xml.Xml.XML_CDATA;
 import static com.varankin.brains.db.xml.XmlBrains.*;
-import com.varankin.brains.gwt.shared.dto.db.DbNode;
-import com.varankin.brains.gwt.client.service.db.DbNodeService;
-import com.varankin.brains.gwt.client.service.db.DbNodeServiceAsync;
 import com.varankin.brains.gwt.client.JsonFactory;
 import com.varankin.brains.gwt.client.JsonFactory.DbNodeBean;
+import com.varankin.brains.gwt.client.service.db.DbNodeService;
+import com.varankin.brains.gwt.client.service.db.DbNodeServiceAsync;
+import com.varankin.brains.gwt.shared.dto.db.DatabaseRequest;
+import com.varankin.brains.gwt.shared.dto.db.DbNode;
 import static com.varankin.io.xml.svg.XmlSvg.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -160,7 +161,14 @@ public class ArchiveView extends DockLayoutPanel
     
     private void onClickPreview( ClickEvent event )
     {
-        
+        TreeItem selection = tree.getSelectedItem();
+        if( selection != null )
+        {
+            DbNode dbn = (DbNode) selection.getUserObject();
+            if( dbService != null )
+                dbService.svgImage( getItemPath( selection ), new AddPreviewTab( 
+                    MainView.getRootPanel( tree ), dbn.getName() ) );
+        }
     }
     
     private void onClickEdit( ClickEvent event )
@@ -305,10 +313,34 @@ public class ArchiveView extends DockLayoutPanel
         }
     }
     
+    private static class AddPreviewTab implements AsyncCallback<String>
+    {
+        final MainView target;
+        final String title;
+        
+        AddPreviewTab( MainView target, String title )
+        {
+            this.target = target;
+            this.title = title;
+        }
+        
+        @Override
+        public void onFailure( Throwable caught )
+        {
+            caught.printStackTrace();
+        }
+        
+        @Override
+        public void onSuccess( String svg )
+        {
+            target.getTabs().add( new ScrollPanel( new HTML( svg ) ), title ); // despite it's SVG
+        }
+    }
+    
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="items">
-    
+
     private static TreeItem itemOf( DbNode dbn )
     {
         HorizontalPanel hp = new HorizontalPanel();
