@@ -41,3 +41,9 @@ h1 {
 #closeButton {
   margin: 15px 6px 6px;
 }
+
+/* fix for selected TreeItem not shown as selected https://github.com/gwtproject/gwt/issues/3801 */
+.gwt-Tree .gwt-TreeItem-selected  {
+  display: table !important;
+}
+
