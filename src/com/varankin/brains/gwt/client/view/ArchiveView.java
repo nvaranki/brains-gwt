@@ -6,6 +6,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -118,6 +119,7 @@ public class ArchiveView extends DockLayoutPanel
         tree = new Tree();
         tree.addOpenHandler( this::onOpenEvent );
         tree.addCloseHandler( this::onCloseEvent );
+        tree.addSelectionHandler( this::onItemSelection );
         add( new ScrollPanel( tree ) );
     }
     
@@ -214,6 +216,13 @@ public class ArchiveView extends DockLayoutPanel
     private void onCloseEvent( CloseEvent<TreeItem> event )
     {
         //TODO no expansion then //event.getTarget().removeItems(); // to obtain actual list on the next open
+    }
+
+    private void onItemSelection( SelectionEvent<TreeItem> event )
+    {
+        TreeItem selectedItem = tree.getSelectedItem();
+        DbNode dbn = (DbNode) selectedItem.getUserObject();
+        //TODO manage toolbar enabled statuses
     }
     
     //</editor-fold>
