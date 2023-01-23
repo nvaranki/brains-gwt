@@ -270,6 +270,7 @@ public class ArchiveView extends DockLayoutPanel
             {
                 // refresh list of children
                 target.addItem( itemOf( result ) );
+                MainView.getRootPanel( tree ).addToLog( result.getName() + " has been loaded from " + result.getTag() );
                 // remember updated list of children
                 int itemCount = target.getItemCount();
                 List<DbNode> current = new ArrayList<>( itemCount );
@@ -279,7 +280,7 @@ public class ArchiveView extends DockLayoutPanel
             }
             else
             {
-                Window.alert( "Archive wasn't open." );
+                MainView.getRootPanel( tree ).addToLog( "Archive wasn't open." );
                 System.err.println( "Archive wasn't open." );
             }
         }
@@ -300,7 +301,12 @@ public class ArchiveView extends DockLayoutPanel
         {
             // refresh list of children
             target.removeItems();
-            Arrays.stream( result ).forEach( c -> target.addItem( itemOf( c ) ) );
+            MainView rootPanel = MainView.getRootPanel( tree );
+            Arrays.stream( result ).forEach( dbn -> 
+            { 
+                target.addItem( itemOf( dbn ) ); 
+                rootPanel.addToLog( dbn.getName() + " has been loaded from " + dbn.getTag() );
+            } );
             ArchiveView.this.saveActualListOfArchives( result );
         }
     }
