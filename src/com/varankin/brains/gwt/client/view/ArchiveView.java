@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.UIObject;
@@ -333,7 +334,10 @@ public class ArchiveView extends DockLayoutPanel
         @Override
         public void onSuccess( String svg )
         {
-            target.getTabs().add( new ScrollPanel( new HTML( svg ) ), title ); // despite it's SVG
+            ScrollPanel tw = new ScrollPanel( new HTML( svg ) ); // despite it's SVG
+            TabLayoutPanel tabs = target.getTabs();
+            tabs.add( tw, title );
+            tabs.selectTab( tw );
         }
     }
     
