@@ -205,7 +205,14 @@ public class ArchiveView extends DockLayoutPanel
     
     private void onClickExportPic( ClickEvent event )
     {
-        
+        TreeItem selection = tree.getSelectedItem();
+        if( selection != null )
+        {
+            DbNode dbn = (DbNode) selection.getUserObject();
+            if( dbService != null )
+                dbService.svgImage( getItemPath( selection ), new SaveTextToLocalFile( 
+                    "image/svg+xml", dbn.getName() + ".svg" ) );
+        }
     }
     
     private void onClickProperties( ClickEvent event )
@@ -342,6 +349,30 @@ public class ArchiveView extends DockLayoutPanel
         }
     }
     
+    private static class SaveTextToLocalFile implements AsyncCallback<String>
+    {
+        final String mime;
+        final String filename;
+        
+        SaveTextToLocalFile( String mime, String filename )
+        {
+            this.mime = mime;
+            this.filename = filename;
+        }
+        
+        @Override
+        public void onFailure( Throwable caught )
+        {
+            caught.printStackTrace();
+        }
+        
+        @Override
+        public void onSuccess( String text )
+        {
+            saveToFile( text, mime, filename );
+        }
+    }
+    
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="items">
@@ -425,6 +456,16 @@ public class ArchiveView extends DockLayoutPanel
             //Window.alert("new local archives: " + json );
         }
     }
+    
+    public static native void saveToFile( String text, String mime, String filename )
+    /*-{
+        var a = document.createElement('a');
+        document.body.appendChild(a);
+        a.href = 'data:' + mime + ';charset=utf-8,' + encodeURIComponent(text);
+        a.download = filename;
+        a.click();
+        document.body.removeChild(a);
+    }-*/; 
     
     //</editor-fold>
     
