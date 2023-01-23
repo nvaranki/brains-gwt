@@ -14,6 +14,7 @@ import com.varankin.brains.gwt.client.service.db.DbNodeService;
 import com.varankin.brains.gwt.shared.dto.db.DatabaseRequest;
 import com.varankin.brains.gwt.shared.dto.db.DbNode;
 import com.varankin.brains.io.svg.save.SvgФабрика;
+import com.varankin.brains.io.xml.save.ExpФабрика;
 import com.varankin.characteristic.Именованный;
 import static com.varankin.filter.И.и;
 import static com.varankin.filter.НЕ.не;
@@ -151,9 +152,29 @@ public class DbNodeServiceImpl
             {
                 транзакция.согласовать( Транзакция.Режим.ЧТЕНИЕ_БЕЗ_ЗАПИСИ, dba.архив() );
                 Predicate<DbЭлемент> сборка = и( new Сборка( (Собираемый) dba ), не( БИБЛИОТЕКА ) );
-                String data = SvgФабрика.getInstance().providerOf( dba, сборка ).get(); //TODO consider to apply Writer
+                String data = SvgФабрика.getInstance().providerOf( dba, сборка ).get();
                 транзакция.завершить( true );
                 System.err.println( "SVG returned: " + data.length() + " chars" );
+                return data;
+            }
+            catch( Exception ex )
+            {
+                ex.printStackTrace();
+            }
+        return "<svg/>";
+    }
+    
+    @Override
+    public String xmlBrains( DbNode[] path ) throws IllegalArgumentException
+    {
+        DbАтрибутный dba = element( path );
+        if( dba instanceof Собираемый ) 
+            try( final Транзакция транзакция = dba.транзакция() )
+            {
+                транзакция.согласовать( Транзакция.Режим.ЧТЕНИЕ_БЕЗ_ЗАПИСИ, dba.архив() );
+                String data = ExpФабрика.getInstance().apply( dba ).get().toString();
+                транзакция.завершить( true );
+                System.err.println( "XML returned: " + data.length() + " chars" );
                 return data;
             }
             catch( Exception ex )

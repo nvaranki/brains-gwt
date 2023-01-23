@@ -200,7 +200,14 @@ public class ArchiveView extends DockLayoutPanel
     
     private void onClickExportXml( ClickEvent event )
     {
-        
+        TreeItem selection = tree.getSelectedItem();
+        if( selection != null )
+        {
+            DbNode dbn = (DbNode) selection.getUserObject();
+            if( dbService != null )
+                dbService.xmlBrains( getItemPath( selection ), new SaveTextToLocalFile( 
+                    "text/xml", dbn.getName() + ".xml" ) );
+        }
     }
     
     private void onClickExportPic( ClickEvent event )

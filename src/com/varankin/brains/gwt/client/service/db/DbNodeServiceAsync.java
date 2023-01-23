@@ -15,4 +15,5 @@ public interface DbNodeServiceAsync
   void archiveNodes( DbNode[] expected, AsyncCallback<DbNode[]> callback ) throws IllegalArgumentException;
   void archiveNodeAt( DatabaseRequest request, AsyncCallback<DbNode> callback ) throws IllegalArgumentException;
   void svgImage( DbNode[] path, AsyncCallback<String> callback ) throws IllegalArgumentException;
+  void xmlBrains( DbNode[] path, AsyncCallback<String> callback ) throws IllegalArgumentException;
 }
