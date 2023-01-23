@@ -53,6 +53,7 @@ public class ArchiveView extends DockLayoutPanel
     private static final String XML_NS_TEMP = "#NS";
     private static final String XML_UN_TEMP = "#OTHER";
     private static final String XML_GRAPHIC = "#GRAPHIC";
+    private static final String NBSP = String.valueOf( Character.toChars( 0x00A0 ) );
     private static final Map<String,String> iconFileName;
     static
     {
@@ -336,7 +337,7 @@ public class ArchiveView extends DockLayoutPanel
         {
             ScrollPanel tw = new ScrollPanel( new HTML( svg ) ); // despite it's SVG
             TabLayoutPanel tabs = target.getTabs();
-            tabs.add( tw, title );
+            tabs.add( tw, title + NBSP + "×" );
             tabs.selectTab( tw );
         }
     }
@@ -349,7 +350,7 @@ public class ArchiveView extends DockLayoutPanel
     {
         HorizontalPanel hp = new HorizontalPanel();
         hp.add( new Image( IPATH + "" + iconFileName.getOrDefault( dbn.getType(), iconFileName.get( null ) ) ) );
-        hp.add( new Label( String.valueOf( Character.toChars( 0x00A0 ) ) + dbn.getName() ) );
+        hp.add( new Label( NBSP + dbn.getName() ) );
         
         TreeItem item = new TreeItem( hp );
         item.setTitle( dbn.getType() + '/' + dbn.getZone() );
