@@ -53,7 +53,7 @@ public class ArchiveView extends DockLayoutPanel
     private static final String XML_NS_TEMP = "#NS";
     private static final String XML_UN_TEMP = "#OTHER";
     private static final String XML_GRAPHIC = "#GRAPHIC";
-    private static final String NBSP = String.valueOf( Character.toChars( 0x00A0 ) );
+    public static final String NBSP = String.valueOf( Character.toChars( 0x00A0 ) );
     private static final Map<String,String> iconFileName;
     static
     {

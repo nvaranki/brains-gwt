@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.StackLayoutPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
+import static com.varankin.brains.gwt.client.view.ArchiveView.NBSP;
 
 /**
  * Построитель главной экранной формы приложения.
@@ -32,9 +33,8 @@ public class MainView extends DockLayoutPanel
         browsers.add( new ScrollPanel( browser ), "Processes", 2 );
 
         tabs = new TabLayoutPanel( 2, Unit.EM );
-        tabs.add( new Label("TODO Quick Start is here"), "Quick Start" );
-        tabs.add( new Label("TODO Analyzer is here"), "Analyzer" );
-        tabs.add( new Label("TODO Summer is here"), "Summer" );
+        tabs.add( new Label("TODO Quick Start is here"), "Quick Start" + NBSP + "×" );
+        tabs.add( new Label("TODO Analyzer is here"), "Analyzer" + NBSP + "×" );
         
         TextArea log = new TextArea();
         log.setText( "TODO status log is here\nAnd here...\nAnd here...\nAnd here...\nAnd here..." );
