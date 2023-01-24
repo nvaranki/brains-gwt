@@ -1,12 +1,16 @@
 package com.varankin.brains.gwt.server;
 
+import com.varankin.brains.db.Транзакция;
 import com.varankin.brains.db.neo4j.local.NeoАрхив;
+import com.varankin.brains.db.type.DbАтрибутный;
 import com.varankin.brains.gwt.shared.dto.db.DatabaseRequest;
+import com.varankin.brains.gwt.shared.dto.db.DbNode;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -48,6 +52,40 @@ public class DbManager
             return loc.getAbsolutePath();
     }
     
+    private static boolean equals( DbАтрибутный dba, DbNode dbn )
+    {
+        String name = DbNodeServiceImpl.name( dba );
+        String type = dba.тип().НАЗВАНИЕ;
+        String zone = Objects.requireNonNullElse( dba.тип().ЗОНА, "" );
+        String tag  = dba.отметка();
+        //System.out.printf( "%s <> %s, %s <> %s, %s <> %s \n", dbn.name(), name, dbn.type(), type, dbn.zone(), zone );
+        return Objects.equals( dbn.getName(), name )
+                && Objects.equals( dbn.getType(), type )
+                && Objects.equals( dbn.getZone(), zone )
+                && Objects.equals( dbn.getTag(),  tag  );
+    }
+    
+    static <T extends DbАтрибутный> T lookup( DbNode dbn, Collection<T> candidates )
+    {
+        T target = null;
+        for( T dba : candidates )
+            try( Транзакция транзакция = dba.транзакция() )
+            {
+                if( equals( dba, dbn ) )
+                {
+                    target = dba;
+                    break;
+                }
+                транзакция.завершить( true );
+            }
+            catch( Exception ex )
+            {
+                ex.printStackTrace();
+                return null;
+            }
+        return target;
+    }
+    
     synchronized NeoАрхив open( DatabaseRequest request ) throws Exception
     {
         File repo = pack( request.path );
@@ -85,11 +123,17 @@ public class DbManager
     
     synchronized void close( NeoАрхив архив )
     {
-        int count = archives.get( архив ) - 1;
-        if( count > 0 )
+        int count = archives.get( архив );
+        System.err.println( "Number of archives serviced: " + archives.size() );
+        System.err.println( "Number of archives serviced at \"" + архив.расположение() + "\": " + count );
+        if( --count > 0 )
             archives.put( архив, count );
         else
+        {
             archives.remove( архив );
+            архив.закрыть();
+        }
+        System.err.println( "Number of archives serviced at \"" + архив.расположение() + "\": " + count );
     }
     
     synchronized Collection<NeoАрхив> all()

@@ -96,7 +96,6 @@ public class ArchiveView extends DockLayoutPanel
     }
 
     private DbNodeServiceAsync dbService;
-    private Storage localStorage;
     private final Tree tree; //TODO CellTree
     
     public ArchiveView()
@@ -106,6 +105,7 @@ public class ArchiveView extends DockLayoutPanel
         VerticalPanel toolbar = new VerticalPanel();
         toolbar.setSpacing( 2 ); //TODO -> CSS
         toolbar.add( new PushButton( new Image( IPATH + "archive.png" ), this::onClickOpen ) );
+        toolbar.add( new PushButton( new Image( IPATH + "archive.png" ), this::onClickClose ) ); //TODO icon
         toolbar.add( new PushButton( new Image( IPATH + "load.png" ), this::onClickLoad ) );
         toolbar.add( new PushButton( new Image( IPATH + "new-library.png" ), this::onClickNew ) );
         toolbar.add( new PushButton( new Image( IPATH + "preview.png" ), this::onClickPreview ) );
@@ -128,17 +128,15 @@ public class ArchiveView extends DockLayoutPanel
     
     void init()
     {
-        localStorage = Storage.getLocalStorageIfSupported();
         dbService = GWT.create( DbNodeService.class );
         if( dbService != null )
-            dbService.archiveNodes( readLastListOfArchives(), new RootNodesSetup() );
+            dbService.archiveNodes( readLastListOfArchives(), new RootNodesSetup( tree ) );
     }
     
     private void onDatabaseOpen( DatabaseRequest request )
     {
-        //Window.alert("DB path: " + request.path + ( request.create ? " [new]" : " [open]" ) );
         if( dbService != null )
-            dbService.archiveNodeAt( request, new AddRootNode() );
+            dbService.archiveNodeOpen( request, new AddRootNode( tree ) );
     }
 
     //<editor-fold defaultstate="collapsed" desc="events">
@@ -149,6 +147,19 @@ public class ArchiveView extends DockLayoutPanel
         dialog.showRelativeTo( (UIObject) event.getSource() );
 //        dialog.setPopupPosition( 150, 100 );
 //        dialog.show();
+    }
+    
+    private void onClickClose( ClickEvent event )
+    {
+        TreeItem selection = tree.getSelectedItem();
+        if( selection != null )
+        {
+            DbNode dbn = (DbNode) selection.getUserObject();
+            if( XML_ARHIVE.equals( dbn.getType() ) )
+                if( dbService != null )
+                    if( Window.confirm( "Close the archive?\nIt can be re-opened later." ) )
+                        dbService.archiveNodeClose( dbn, new CloseRootNode( selection ) );
+        }
     }
     
     private void onClickLoad( ClickEvent event )
@@ -253,9 +264,14 @@ public class ArchiveView extends DockLayoutPanel
     
     //<editor-fold defaultstate="collapsed" desc="callbacks">
     
-    private class AddRootNode implements AsyncCallback<DbNode>
+    private static class AddRootNode implements AsyncCallback<DbNode>
     {
-        final Tree target = ArchiveView.this.tree;
+        final Tree target;
+
+        AddRootNode( Tree tree )
+        {
+            target = tree;
+        }
         
         @Override
         public void onFailure( Throwable caught )
@@ -270,25 +286,52 @@ public class ArchiveView extends DockLayoutPanel
             {
                 // refresh list of children
                 target.addItem( itemOf( result ) );
-                MainView.getRootPanel( tree ).addToLog( result.getName() + " has been loaded from " + result.getTag() );
-                // remember updated list of children
-                int itemCount = target.getItemCount();
-                List<DbNode> current = new ArrayList<>( itemCount );
-                for( int i = 0; i < itemCount; i++ )
-                    current.add( (DbNode) target.getItem( i ).getUserObject() );
-                ArchiveView.this.saveActualListOfArchives( current.toArray( new DbNode[itemCount] ) );
+                MainView.getRootPanel( target ).addToLog( result.getName() + " has been loaded from " + result.getTag() );
+                saveActualListOfArchives( target );
             }
             else
             {
-                MainView.getRootPanel( tree ).addToLog( "Archive wasn't open." );
+                MainView.getRootPanel( target ).addToLog( "Archive wasn't open." );
                 System.err.println( "Archive wasn't open." );
             }
         }
     }
     
-    private class RootNodesSetup implements AsyncCallback<DbNode[]>
+    private static class CloseRootNode implements AsyncCallback<Void>
     {
-        final Tree target = ArchiveView.this.tree;
+        final TreeItem item;
+        
+        CloseRootNode( TreeItem item )
+        {
+            this.item = item;
+        }
+        
+        @Override
+        public void onFailure( Throwable caught )
+        {
+            caught.printStackTrace();
+        }
+        
+        @Override
+        public void onSuccess( Void no_arg )
+        {
+            MainView rootPanel = MainView.getRootPanel( item.getWidget() );
+            DbNode dbn = (DbNode) item.getUserObject();
+            Tree tree = item.getTree();
+            item.remove();
+            rootPanel.addToLog( "Archive " + dbn.getName() + " has been closed." );
+            saveActualListOfArchives( tree );
+        }
+    }
+    
+    private static class RootNodesSetup implements AsyncCallback<DbNode[]>
+    {
+        final Tree target;
+
+        RootNodesSetup( Tree tree )
+        {
+            target = tree;
+        }
         
         @Override
         public void onFailure( Throwable caught )
@@ -301,13 +344,13 @@ public class ArchiveView extends DockLayoutPanel
         {
             // refresh list of children
             target.removeItems();
-            MainView rootPanel = MainView.getRootPanel( tree );
+            MainView rootPanel = MainView.getRootPanel( target );
             Arrays.stream( result ).forEach( dbn -> 
             { 
                 target.addItem( itemOf( dbn ) ); 
                 rootPanel.addToLog( dbn.getName() + " has been loaded from " + dbn.getTag() );
             } );
-            ArchiveView.this.saveActualListOfArchives( result );
+            saveActualListOfArchives( result );
         }
     }
     
@@ -357,7 +400,7 @@ public class ArchiveView extends DockLayoutPanel
         {
             ScrollPanel tw = new ScrollPanel( new HTML( svg ) ); // despite it's SVG
             TabLayoutPanel tabs = target.getTabs();
-            tabs.add( tw, title + NBSP + "×" );
+            tabs.add( tw, title + NBSP + "×" ); //TODO close button
             tabs.selectTab( tw );
         }
     }
@@ -421,23 +464,22 @@ public class ArchiveView extends DockLayoutPanel
     
     //<editor-fold defaultstate="collapsed" desc="storage">
     
-    private DbNode[] readLastListOfArchives()
+    private static DbNode[] readLastListOfArchives()
     {
         List<DbNode> expected = new LinkedList<>();
+        Storage localStorage = Storage.getLocalStorageIfSupported();
         if( localStorage != null )
         {
             if( localStorage != null )
             {
                 // obtain last list of archives
                 String json = localStorage.getItem( LS_ARCHIVES );
-                //Window.alert("saved local archives: " + json );
+                //Window.alert("past local archives: " + json );
                 if( json == null || json.trim().isEmpty() ) json = "";
-                //Window.alert("old local archives: " + json );
                 JsonFactory serializer = GWT.create( JsonFactory.class );
                 for( String item : json.split( LS_SPLITTER ) )
                     if( ! item.trim().isEmpty() )
                     {
-                        //Window.alert("saved local archive: " + item );
                         AutoBean<DbNodeBean> bean = AutoBeanCodex.decode( serializer, DbNodeBean.class, item );
                         expected.add( new DbNode( bean.as() ) );
                     }
@@ -446,8 +488,18 @@ public class ArchiveView extends DockLayoutPanel
         return expected.toArray( new DbNode[expected.size()] );
     }
     
-    private void saveActualListOfArchives( DbNode[] nodes )
+    private static void saveActualListOfArchives( Tree tree )
     {
+        int itemCount = tree.getItemCount();
+        List<DbNode> current = new ArrayList<>( itemCount );
+        for( int i = 0; i < itemCount; i++ )
+            current.add( (DbNode) tree.getItem( i ).getUserObject() );
+        saveActualListOfArchives( current.toArray( new DbNode[itemCount] ) );
+    }
+    
+    private static void saveActualListOfArchives( DbNode[] nodes )
+    {
+        Storage localStorage = Storage.getLocalStorageIfSupported();
         if( localStorage != null )
         {
             // reset actual list of archives
@@ -466,7 +518,7 @@ public class ArchiveView extends DockLayoutPanel
                 json.append( item );
             }
             localStorage.setItem( LS_ARCHIVES, json.toString() );
-            //Window.alert("new local archives: " + json );
+            //Window.alert("future local archives: " + json );
         }
     }
     

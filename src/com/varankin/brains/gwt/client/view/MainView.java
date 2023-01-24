@@ -16,7 +16,7 @@ import static com.varankin.brains.gwt.client.view.ArchiveView.NBSP;
  * 
  * @author &copy; 2023 Николай Варанкин
  */
-public class MainView extends DockLayoutPanel
+public final class MainView extends DockLayoutPanel
 {
     private static final int LOG_LINES = 500; //TODO config
 
@@ -57,7 +57,7 @@ public class MainView extends DockLayoutPanel
         addToLog( "The Thinker™ started." );
     }
     
-    public final void addToLog( String text )
+    final void addToLog( String text )
     {
         String[] current = log.getText().split( "\n" );
         String[] update = text.split( "\n" );
@@ -74,7 +74,7 @@ public class MainView extends DockLayoutPanel
         log.getElement().setScrollLeft( 0 ); // show beginning of the last line
     }
 
-    public final TabLayoutPanel getTabs()
+    final TabLayoutPanel getTabs()
     {
         return tabs;
     }

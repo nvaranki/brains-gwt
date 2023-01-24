@@ -49,7 +49,7 @@ public class DbNodeServiceImpl
     //<editor-fold defaultstate="expanded" desc="entries">
     
     @Override
-    public DbNode archiveNodeAt( DatabaseRequest request ) throws IllegalArgumentException
+    public DbNode archiveNodeOpen( DatabaseRequest request ) throws IllegalArgumentException
     {
         try
         {
@@ -72,30 +72,36 @@ public class DbNodeServiceImpl
     }
     
     @Override
+    public void archiveNodeClose( DbNode dbn ) throws IllegalArgumentException
+    {
+        System.err.println( "Closing archive node: " + dbn.getTag() );
+        NeoАрхив found = DbManager.lookup( dbn, DbManager.getInstance().all() );
+        if( found != null )
+            DbManager.getInstance().close( found );
+    }
+        
+    @Override
     public DbNode[] archiveNodes( DbNode[] expected ) throws IllegalArgumentException
     {
         List<DbNode> result = new LinkedList<>();
         for( DbNode dbn : expected ) // expected is probably smaller than amount of loaded archives
         {
             System.err.println( "Loading saved node: " + dbn.getTag() );
+            NeoАрхив found = DbManager.lookup( dbn, DbManager.getInstance().all() );
+            System.err.println( dbn.getTag() + " found: " + ( found != null ) );
             DbNode exists = null;
-            for( DbАрхив архив : DbManager.getInstance().all() )
-                try( Транзакция транзакция = архив.транзакция() )
+            if( found != null )
+                try( Транзакция транзакция = found.транзакция() )
                 {
-                    if( equals( архив, dbn ) )
-                    {
-                        // supply previously opened archive
-                        exists = instanceOfDbNode( архив );
-                        транзакция.завершить( true );
-                        break;
-                    }
+                    // supply previously opened archive
+                    exists = instanceOfDbNode( found );
                     транзакция.завершить( true );
                 }
                 catch( Exception ex )
                 {
                     ex.printStackTrace();
                 }
-            if( exists == null )
+            else
                 try
                 {
                     // attempt to open referenced archive
@@ -195,22 +201,7 @@ public class DbNodeServiceImpl
         {
             Collection<? extends DbАтрибутный> candidates = target == null ?
                     DbManager.getInstance().all() : allChildren( target );
-            target = null;
-            for( DbАтрибутный dba : candidates )
-                try( Транзакция транзакция = dba.транзакция() )
-                {
-                    if( equals( dba, dbn ) )
-                    {
-                        target = dba;
-                        break;
-                    }
-                    транзакция.завершить( true );
-                }
-                catch( Exception ex )
-                {
-                    ex.printStackTrace();
-                    return null;
-                }
+            target = DbManager.lookup( dbn, candidates );
             if( target == null ) 
             {
                 System.err.println( "No match of UI to DB" );
@@ -258,20 +249,7 @@ public class DbNodeServiceImpl
                 dba.отметка() );
     }
     
-    private static boolean equals( DbАтрибутный dba, DbNode dbn )
-    {
-        String name = name( dba );
-        String type = dba.тип().НАЗВАНИЕ;
-        String zone = Objects.requireNonNullElse( dba.тип().ЗОНА, "" );
-        String tag  = dba.отметка();
-        //System.out.printf( "%s <> %s, %s <> %s, %s <> %s \n", dbn.name(), name, dbn.type(), type, dbn.zone(), zone );
-        return Objects.equals( dbn.getName(), name )
-                && Objects.equals( dbn.getType(), type )
-                && Objects.equals( dbn.getZone(), zone )
-                && Objects.equals( dbn.getTag(),  tag  );
-    }
-    
-    private static String name( DbАтрибутный dba )
+    static String name( DbАтрибутный dba )
     {
         return dba instanceof Именованный ?
                 Objects.requireNonNullElse( nullable( ( (Именованный) dba ).название() ), dba.тип().НАЗВАНИЕ ) :

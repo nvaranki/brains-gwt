@@ -15,7 +15,8 @@ public interface DbNodeService extends RemoteService
 {
     DbNode[] nodesFrom( DbNode[] path ) throws IllegalArgumentException;
     DbNode[] archiveNodes( DbNode[] expected ) throws IllegalArgumentException;
-    DbNode archiveNodeAt( DatabaseRequest request ) throws IllegalArgumentException;
+    DbNode archiveNodeOpen( DatabaseRequest request ) throws IllegalArgumentException;
+    void archiveNodeClose( DbNode node ) throws IllegalArgumentException;
     String svgImage( DbNode[] path ) throws IllegalArgumentException;
     String xmlBrains( DbNode[] path ) throws IllegalArgumentException;
 }
