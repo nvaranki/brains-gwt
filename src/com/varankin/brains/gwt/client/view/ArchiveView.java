@@ -104,18 +104,23 @@ public class ArchiveView extends DockLayoutPanel
 
         VerticalPanel toolbar = new VerticalPanel();
         toolbar.setSpacing( 2 ); //TODO -> CSS
+        // archive I/O
         toolbar.add( new PushButton( new Image( IPATH + "archive.png" ), this::onClickOpen ) );
         toolbar.add( new PushButton( new Image( IPATH + "archive.png" ), this::onClickClose ) ); //TODO icon
-        toolbar.add( new PushButton( new Image( IPATH + "load.png" ), this::onClickLoad ) );
-        toolbar.add( new PushButton( new Image( IPATH + "new-library.png" ), this::onClickNew ) );
-        toolbar.add( new PushButton( new Image( IPATH + "preview.png" ), this::onClickPreview ) );
-        toolbar.add( new PushButton( new Image( IPATH + "edit.png" ), this::onClickEdit ) );
-        toolbar.add( new PushButton( new Image( IPATH + "multiply.png" ), this::onClickMultiply ) );
-        toolbar.add( new PushButton( new Image( IPATH + "remove.png" ), this::onClickRemove ) );
         toolbar.add( new PushButton( new Image( IPATH + "file-xml.png" ), this::onClickImportFile ) );
         toolbar.add( new PushButton( new Image( IPATH + "load-internet.png" ), this::onClickImportNet ) );
         toolbar.add( new PushButton( new Image( IPATH + "file-export.png" ), this::onClickExportXml ) );
         toolbar.add( new PushButton( new Image( IPATH + "file-export.png" ), this::onClickExportPic ) );
+        toolbar.add( new HorizontalPanel() ); //TODO separator
+        // archive operations
+        toolbar.add( new PushButton( new Image( IPATH + "load.png" ), this::onClickLoad ) );
+        toolbar.add( new HorizontalPanel() ); //TODO separator
+        toolbar.add( new PushButton( new Image( IPATH + "new-library.png" ), this::onClickNew ) );
+        toolbar.add( new PushButton( new Image( IPATH + "edit.png" ), this::onClickEdit ) );
+        toolbar.add( new PushButton( new Image( IPATH + "multiply.png" ), this::onClickMultiply ) );
+        toolbar.add( new PushButton( new Image( IPATH + "remove.png" ), this::onClickRemove ) );
+        toolbar.add( new HorizontalPanel() ); //TODO separator
+        toolbar.add( new PushButton( new Image( IPATH + "preview.png" ), this::onClickPreview ) );
         toolbar.add( new PushButton( new Image( IPATH + "properties.png" ), this::onClickProperties ) );
         addWest( toolbar, 34 );
         
