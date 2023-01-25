@@ -128,6 +128,7 @@ public class ArchiveView extends DockLayoutPanel
         tree.addOpenHandler( this::onOpenEvent );
         tree.addCloseHandler( this::onCloseEvent );
         tree.addSelectionHandler( this::onItemSelection );
+        tree.addItem( new Label( "No open archives." ) );
         add( new ScrollPanel( tree ) );
     }
     
@@ -271,11 +272,11 @@ public class ArchiveView extends DockLayoutPanel
     
     private static class AddRootNode implements AsyncCallback<DbNode>
     {
-        final Tree target;
+        final Tree tree;
 
         AddRootNode( Tree tree )
         {
-            target = tree;
+            this.tree = tree;
         }
         
         @Override
@@ -289,14 +290,16 @@ public class ArchiveView extends DockLayoutPanel
         {
             if( result != null )
             {
+                if( tree.getItemCount() == 1 && tree.getItem( 0 ).getUserObject() == null )
+                    tree.getItem( 0 ).remove();
                 // refresh list of children
-                target.addItem( itemOf( result ) );
-                MainView.getRootPanel( target ).addToLog( result.getName() + " has been loaded from " + result.getTag() );
-                saveActualListOfArchives( target );
+                tree.addItem( itemOf( result ) );
+                MainView.getRootPanel( tree ).addToLog( result.getName() + " has been loaded from " + result.getTag() );
+                saveActualListOfArchives( tree );
             }
             else
             {
-                MainView.getRootPanel( target ).addToLog( "Archive wasn't open." );
+                MainView.getRootPanel( tree ).addToLog( "Archive wasn't open." );
                 System.err.println( "Archive wasn't open." );
             }
         }
@@ -326,6 +329,8 @@ public class ArchiveView extends DockLayoutPanel
             item.remove();
             rootPanel.addToLog( "Archive " + dbn.getName() + " has been closed." );
             saveActualListOfArchives( tree );
+            if( tree.getItemCount() == 0 )
+                tree.addItem( new Label( "No open archives." ) );
         }
     }
     
@@ -348,7 +353,8 @@ public class ArchiveView extends DockLayoutPanel
         public void onSuccess( DbNode[] result )
         {
             // refresh list of children
-            target.removeItems();
+            if( result.length > 0 )
+                target.removeItems();
             MainView rootPanel = MainView.getRootPanel( target );
             Arrays.stream( result ).forEach( dbn -> 
             { 
