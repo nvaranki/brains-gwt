@@ -11,15 +11,14 @@ as either a plain number or floating timeline graph.
 
 Screenshots:
 
-![Schematics](http://varankin.com/software/13/net10x10_sc.png)
-
-![Timelines](http://varankin.com/software/13/self_summer_2x2_07.png)
+![Schematics](https://media.licdn.com/dms/image/D4D2CAQHHIkTKPGMLlg/comment-image-shrink_8192_1280/0/1674994165058?e=1675602000&v=beta&t=xJJ_U-aJWr-aA-p-ZhZc5-zy4FMEBJguB3qnNozrjjM)
 
 Documentation:
 [Introduction](http://varankin.com/software/13/Thinker-1.0.202201291222.pdf), 
 [Functional Description](http://varankin.com/software/13/Thinker-fd-1.0.2022010291228.pdf). 
 
 This is a NetBeans/Ant project built on [GWT™](https://www.gwtproject.org/) API. It requires: 
+[../brains-db-appl](https://github.com/nvaranki/brains-db-appl) 
 [../brains-db-api](https://github.com/nvaranki/brains-db-api) 
 [../brains-db-neo4j](https://github.com/nvaranki/brains-db-neo4j) 
 [../stream](https://github.com/nvaranki/stream) 
