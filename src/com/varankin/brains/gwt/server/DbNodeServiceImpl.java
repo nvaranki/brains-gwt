@@ -160,7 +160,7 @@ public class DbNodeServiceImpl
                 Predicate<DbЭлемент> сборка = и( new Сборка( (Собираемый) dba ), не( БИБЛИОТЕКА ) );
                 String data = SvgФабрика.getInstance().providerOf( dba, сборка ).get();
                 транзакция.завершить( true );
-                System.err.println( "SVG returned: " + data.length() + " chars" );
+                System.out.println( "SVG returned: " + data.length() + " chars" );
                 return data;
             }
             catch( Exception ex )
@@ -174,20 +174,20 @@ public class DbNodeServiceImpl
     public String xmlBrains( DbNode[] path ) throws IllegalArgumentException
     {
         DbАтрибутный dba = element( path );
-        if( dba instanceof Собираемый ) 
+        if( dba != null ) 
             try( final Транзакция транзакция = dba.транзакция() )
             {
                 транзакция.согласовать( Транзакция.Режим.ЧТЕНИЕ_БЕЗ_ЗАПИСИ, dba.архив() );
                 String data = ExpФабрика.getInstance().apply( dba ).get().toString();
                 транзакция.завершить( true );
-                System.err.println( "XML returned: " + data.length() + " chars" );
+                System.out.println( "XML returned: " + data.length() + " chars" );
                 return data;
             }
             catch( Exception ex )
             {
                 ex.printStackTrace();
             }
-        return "<svg/>";
+        return "<xml/>";
     }
     
     //</editor-fold>
