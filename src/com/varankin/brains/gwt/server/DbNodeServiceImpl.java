@@ -240,7 +240,7 @@ public class DbNodeServiceImpl
             }
     }
     
-    private static DbNode instanceOfDbNode( DbАтрибутный dba )
+    static DbNode instanceOfDbNode( DbАтрибутный dba )
     {
         return new DbNode(
                 name( dba ),

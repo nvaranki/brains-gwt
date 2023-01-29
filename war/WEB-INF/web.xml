@@ -6,14 +6,23 @@
          xmlns="http://java.sun.com/xml/ns/javaee">
 
   <!-- Servlets -->
+  
   <servlet>
     <servlet-name>dbNodeService</servlet-name>
     <servlet-class>com.varankin.brains.gwt.server.DbNodeServiceImpl</servlet-class>
   </servlet>
-  
   <servlet-mapping>
     <servlet-name>dbNodeService</servlet-name>
     <url-pattern>/thinkerapplication/db/node/children</url-pattern><!-- does not get updated smoothly for Jetty -->
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>dbUploadService</servlet-name>
+    <servlet-class>com.varankin.brains.gwt.server.DbUploadServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>dbUploadService</servlet-name>
+    <url-pattern>/thinkerapplication/db/upload</url-pattern><!-- does not get updated smoothly for Jetty -->
   </servlet-mapping>
   
   <!-- Default page to serve -->

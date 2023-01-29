@@ -27,7 +27,6 @@ import static com.varankin.brains.db.xml.Xml.PI_ELEMENT;
 import static com.varankin.brains.db.xml.Xml.XML_CDATA;
 import static com.varankin.brains.db.xml.XmlBrains.*;
 import com.varankin.brains.gwt.client.JsonFactory;
-import com.varankin.brains.gwt.client.JsonFactory.DbNodeBean;
 import com.varankin.brains.gwt.client.service.db.DbNodeService;
 import com.varankin.brains.gwt.client.service.db.DbNodeServiceAsync;
 import com.varankin.brains.gwt.shared.dto.db.DatabaseRequest;
@@ -54,6 +53,7 @@ public class ArchiveView extends DockLayoutPanel
     private static final String XML_UN_TEMP = "#OTHER";
     private static final String XML_GRAPHIC = "#GRAPHIC";
     public static final String NBSP = String.valueOf( Character.toChars( 0x00A0 ) );
+    private static final JsonFactory serializer = GWT.create( JsonFactory.class );
     private static final Map<String,String> iconFileName;
     static
     {
@@ -207,7 +207,27 @@ public class ArchiveView extends DockLayoutPanel
     
     private void onClickImportFile( ClickEvent event )
     {
-        
+        MainView logger = MainView.getRootPanel( tree );
+        TreeItem selection = tree.getSelectedItem();
+        if( selection == null )
+            logger.addToLog( "Select an archive to import to." );
+        else if( !( selection.getUserObject() instanceof DbNode ) )
+            logger.addToLog( "Unable to import to item " + selection.getText() );
+        else
+        {
+            DbNode dbn = (DbNode) selection.getUserObject();
+            if( ! XML_ARHIVE.equals( dbn.getType() ) )
+                logger.addToLog( "Selected item isn't an archive." );
+            else
+            {
+                UploadDialog dialog = new UploadDialog( selection, logger );
+                // nothing will work if not shown
+                dialog.showRelativeTo( (UIObject) event.getSource() );
+                // go immediately to file selection
+                dialog.setVisible( false );
+                dialog.select();
+            }
+        }
     }
     
     private void onClickImportNet( ClickEvent event )
@@ -444,7 +464,7 @@ public class ArchiveView extends DockLayoutPanel
     
     //<editor-fold defaultstate="collapsed" desc="items">
 
-    private static TreeItem itemOf( DbNode dbn )
+    static TreeItem itemOf( DbNode dbn )
     {
         HorizontalPanel hp = new HorizontalPanel();
         hp.add( new Image( IPATH + "" + iconFileName.getOrDefault( dbn.getType(), iconFileName.get( null ) ) ) );
@@ -470,6 +490,23 @@ public class ArchiveView extends DockLayoutPanel
         }
         return path.toArray( new DbNode[0] );
     }
+
+    static DbNode fromJson( String json )
+    {
+        AutoBean<JsonFactory.DbNodeBean> bean = AutoBeanCodex.decode( serializer, JsonFactory.DbNodeBean.class, json );
+        return bean == null ? null : new DbNode( bean.as() );
+    }
+
+    static String toJson( DbNode dbn )
+    {
+        AutoBean<JsonFactory.DbNodeBean> bean = serializer.create( JsonFactory.DbNodeBean.class );
+        JsonFactory.DbNodeBean t = bean.as();
+        t.setName( dbn.getName() );
+        t.setType( dbn.getType() );
+        t.setZone( dbn.getZone() );
+        t.setTag ( dbn.getTag()  );
+        return AutoBeanCodex.encode( bean ).getPayload();
+    }
     
     //</editor-fold>
     
@@ -481,20 +518,13 @@ public class ArchiveView extends DockLayoutPanel
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if( localStorage != null )
         {
-            if( localStorage != null )
-            {
-                // obtain last list of archives
-                String json = localStorage.getItem( LS_ARCHIVES );
-                //Window.alert("past local archives: " + json );
-                if( json == null || json.trim().isEmpty() ) json = "";
-                JsonFactory serializer = GWT.create( JsonFactory.class );
-                for( String item : json.split( LS_SPLITTER ) )
-                    if( ! item.trim().isEmpty() )
-                    {
-                        AutoBean<DbNodeBean> bean = AutoBeanCodex.decode( serializer, DbNodeBean.class, item );
-                        expected.add( new DbNode( bean.as() ) );
-                    }
-            }
+            // obtain last list of archives
+            String json = localStorage.getItem( LS_ARCHIVES );
+            //Window.alert("past local archives: " + json );
+            if( json == null || json.trim().isEmpty() ) json = "";
+            for( String item : json.split( LS_SPLITTER ) )
+                if( ! item.trim().isEmpty() )
+                    expected.add( fromJson( item ) );
         }
         return expected.toArray( new DbNode[expected.size()] );
     }
@@ -517,16 +547,8 @@ public class ArchiveView extends DockLayoutPanel
             StringBuilder json = new StringBuilder();
             for( DbNode dbn : nodes )
             {
-                JsonFactory serializer = GWT.create( JsonFactory.class );
-                AutoBean<DbNodeBean> bean = serializer.create( DbNodeBean.class );
-                DbNodeBean t = bean.as();
-                t.setName( dbn.getName() );
-                t.setType( dbn.getType() );
-                t.setZone( dbn.getZone() );
-                t.setTag ( dbn.getTag()  );
-                String item = AutoBeanCodex.encode( bean ).getPayload();
                 if( json.length() > 0 ) json.append( LS_SPLITTER ); // API doesn't allow to handlie array
-                json.append( item );
+                json.append( toJson( dbn ) );
             }
             localStorage.setItem( LS_ARCHIVES, json.toString() );
             //Window.alert("future local archives: " + json );
