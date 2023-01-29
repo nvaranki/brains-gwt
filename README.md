@@ -18,7 +18,7 @@ Documentation:
 [Functional Description](http://varankin.com/software/13/Thinker-fd-1.0.2022010291228.pdf). 
 
 This is a NetBeans/Ant project built on [GWT™](https://www.gwtproject.org/) API. It requires: 
-[../brains-db-appl](https://github.com/nvaranki/brains-db-appl) 
+[../brains-appl](https://github.com/nvaranki/brains-appl) 
 [../brains-db-api](https://github.com/nvaranki/brains-db-api) 
 [../brains-db-neo4j](https://github.com/nvaranki/brains-db-neo4j) 
 [../stream](https://github.com/nvaranki/stream) 
