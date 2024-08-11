@@ -11,7 +11,7 @@ as either a plain number or floating timeline graph.
 
 Screenshots:
 
-![Schematics](https://media.licdn.com/dms/image/D4D2CAQHHIkTKPGMLlg/comment-image-shrink_8192_1280/0/1674994165058?e=1675602000&v=beta&t=xJJ_U-aJWr-aA-p-ZhZc5-zy4FMEBJguB3qnNozrjjM)
+![Schematics](https://varankin.com/software/13/soft/1674994165058.png)
 
 Documentation:
 [Introduction](http://varankin.com/software/13/Thinker-1.0.202201291222.pdf), 
